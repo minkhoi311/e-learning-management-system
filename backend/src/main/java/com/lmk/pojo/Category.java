@@ -5,7 +5,6 @@
 package com.lmk.pojo;
 
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +14,8 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -27,8 +28,7 @@ import java.util.Set;
 @NamedQueries({
     @NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c"),
     @NamedQuery(name = "Category.findById", query = "SELECT c FROM Category c WHERE c.id = :id"),
-    @NamedQuery(name = "Category.findByName", query = "SELECT c FROM Category c WHERE c.name = :name"),
-    @NamedQuery(name = "Category.findByDescription", query = "SELECT c FROM Category c WHERE c.description = :description")})
+    @NamedQuery(name = "Category.findByName", query = "SELECT c FROM Category c WHERE c.name = :name")})
 public class Category implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -38,12 +38,12 @@ public class Category implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
-    @Column(name = "description")
-    private String description;
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "categoryId")
-//    private Set<Product> productSet;
+    @OneToMany(mappedBy = "categoryId")
+    private Set<Course> courseSet;
 
     public Category() {
     }
@@ -73,21 +73,13 @@ public class Category implements Serializable {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public Set<Course> getCourseSet() {
+        return courseSet;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCourseSet(Set<Course> courseSet) {
+        this.courseSet = courseSet;
     }
-
-//    public Set<Product> getProductSet() {
-//        return productSet;
-//    }
-//
-//    public void setProductSet(Set<Product> productSet) {
-//        this.productSet = productSet;
-//    }
 
     @Override
     public int hashCode() {
@@ -111,7 +103,7 @@ public class Category implements Serializable {
 
     @Override
     public String toString() {
-        return "com.khoi.pojo.Category[ id=" + id + " ]";
+        return "com.lmk.pojo.Category[ id=" + id + " ]";
     }
     
 }

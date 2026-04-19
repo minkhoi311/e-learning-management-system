@@ -16,5 +16,5 @@ Hệ thống quản lý khóa học trực tuyến xây dựng bằng Java MVC, 
 ###  Cơ sở dữ liệu
 - MySQL
 
-### Testing
+### Testing api
 - Postman

@@ -1,0 +1,207 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Quản lý Khóa học</title>
+    <th:block th:replace="~{base :: css}"></th:block>
+    <style>
+        .filter-card { background: #f8f9fa; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+        .badge-active { background-color: #0d6efd; }
+        .badge-inactive { background-color: #6c757d; }
+        .course-img { width: 90px; height: 60px; object-fit: cover; border-radius: 4px; }
+        .page-item.active .page-link { background-color: #0d6efd; border-color: #0d6efd; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{base :: header}"></div>
+
+    <div class="container-fluid mt-4 px-4">
+
+        <!-- ====== THÔNG BÁO THÀNH CÔNG / LỖI ====== -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- ====== TIÊU ĐỀ + NÚT THÊM MỚI ====== -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-primary mb-0">📚 Quản lý Khóa học</h4>
+            <a th:href="@{/admin/courses/add}" class="btn btn-success">
+                ＋ Thêm khóa học
+            </a>
+        </div>
+
+        <!-- ====== BỘ LỌC / TÌM KIẾM ====== -->
+        <div class="filter-card">
+            <form th:action="@{/admin/courses}" method="get" class="row g-2 align-items-end">
+                <!-- Tìm theo tên -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Tên khóa học</label>
+                    <input type="text" name="kw" class="form-control form-control-sm"
+                           placeholder="Tìm kiếm..." th:value="${params['kw']}" />
+                </div>
+                <!-- Lọc danh mục -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Danh mục</label>
+                    <select name="cateId" class="form-select form-select-sm">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="c : ${categories}"
+                                th:value="${c.id}"
+                                th:text="${c.name}"
+                                th:selected="${params['cateId'] == c.id.toString()}">
+                        </option>
+                    </select>
+                </div>
+                <!-- Từ giá -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Từ giá (VNĐ)</label>
+                    <input type="number" name="fromPrice" class="form-control form-control-sm"
+                           placeholder="0" min="0" th:value="${params['fromPrice']}" />
+                </div>
+                <!-- Đến giá -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Đến giá (VNĐ)</label>
+                    <input type="number" name="toPrice" class="form-control form-control-sm"
+                           placeholder="999999999" min="0" th:value="${params['toPrice']}" />
+                </div>
+                <!-- Sắp xếp -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Sắp xếp</label>
+                    <select name="sort" class="form-select form-select-sm">
+                        <option value="newest"     th:selected="${params['sort'] == 'newest'}">Mới nhất</option>
+                        <option value="price_asc"  th:selected="${params['sort'] == 'price_asc'}">Giá tăng dần</option>
+                        <option value="price_desc" th:selected="${params['sort'] == 'price_desc'}">Giá giảm dần</option>
+                        <option value="name_asc"   th:selected="${params['sort'] == 'name_asc'}">Tên A→Z</option>
+                    </select>
+                </div>
+                <!-- Nút tìm / xóa lọc -->
+                <div class="col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm">🔍</button>
+                    <a th:href="@{/admin/courses}" class="btn btn-outline-secondary btn-sm">✕</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- ====== BẢNG DANH SÁCH ====== -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center" style="width:100px">Ảnh</th>
+                        <th>Tên khóa học</th>
+                        <th style="width:130px">Danh mục</th>
+                        <th style="width:150px">Giảng viên</th>
+                        <th class="text-end" style="width:130px">Học phí (VNĐ)</th>
+                        <th class="text-center" style="width:90px">T.lượng (h)</th>
+                        <th class="text-center" style="width:100px">Trạng thái</th>
+                        <th class="text-center" style="width:120px">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <!-- Lặp qua danh sách khóa học -->
+                    <tr th:each="c : ${courses}">
+                        <td class="text-center">
+                            <!-- Hiện ảnh nếu có, không thì hiện placeholder -->
+                            <img th:if="${c.image != null and !c.image.isBlank()}"
+                                 th:src="${c.image}" alt="Course" class="course-img" />
+                            <span th:unless="${c.image != null and !c.image.isBlank()}"
+                                  class="text-muted small">Chưa có ảnh</span>
+                        </td>
+
+                        <td>
+                            <span class="fw-semibold" th:text="${c.subject}"></span>
+                            <br/>
+                            <small class="text-muted" th:text="${#strings.abbreviate(c.description, 60)}"></small>
+                        </td>
+
+                        <td>
+                            <span th:if="${c.category != null}" th:text="${c.category.name}"></span>
+                            <span th:unless="${c.category != null}" class="text-muted fst-italic">—</span>
+                        </td>
+
+                        <td th:text="${c.instructor != null ? c.instructor.lastName + ' ' + c.instructor.firstName : '—'}"></td>
+
+                        <td class="text-end fw-semibold">
+                            <!-- Giá 0 hiện "Miễn phí" -->
+                            <span th:if="${c.price == 0}" class="text-success">Miễn phí</span>
+                            <span th:unless="${c.price == 0}"
+                                  th:text="${#numbers.formatDecimal(c.price, 0, 'COMMA', 0, 'POINT')}"></span>
+                        </td>
+
+                        <td class="text-center" th:text="${c.durationHours != null ? c.durationHours : '—'}"></td>
+
+                        <td class="text-center">
+                            <span th:if="${c.isActive}" class="badge bg-primary">Đang mở</span>
+                            <span th:unless="${c.isActive}" class="badge bg-secondary">Tạm khóa</span>
+                        </td>
+
+                        <td class="text-center">
+                            <a th:href="@{/admin/courses/edit/{id}(id=${c.id})}"
+                               class="btn btn-sm btn-outline-info mb-1">✏️ Sửa</a>
+
+                            <!-- Nút xóa với xác nhận -->
+                            <form th:action="@{/admin/courses/delete/{id}(id=${c.id})}"
+                                  method="post" style="display:inline;"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa khóa học này?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger mb-1">🗑️ Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Trường hợp danh sách rỗng -->
+                    <tr th:if="${#lists.isEmpty(courses)}">
+                        <td colspan="8" class="text-center text-muted py-4 fst-italic">
+                            Không có khóa học nào phù hợp.
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ====== PHÂN TRANG ====== -->
+        <nav th:if="${totalPages > 1}" aria-label="Phân trang">
+            <ul class="pagination justify-content-center">
+
+                <!-- Nút Previous -->
+                <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/courses(page=${currentPage - 1}, kw=${params['kw']}, cateId=${params['cateId']}, fromPrice=${params['fromPrice']}, toPrice=${params['toPrice']}, sort=${params['sort']})}">
+                        &laquo;
+                    </a>
+                </li>
+
+                <!-- Các số trang -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(1, totalPages)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link"
+                       th:text="${i}"
+                       th:href="@{/admin/courses(page=${i}, kw=${params['kw']}, cateId=${params['cateId']}, fromPrice=${params['fromPrice']}, toPrice=${params['toPrice']}, sort=${params['sort']})}">
+                    </a>
+                </li>
+
+                <!-- Nút Next -->
+                <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/courses(page=${currentPage + 1}, kw=${params['kw']}, cateId=${params['cateId']}, fromPrice=${params['fromPrice']}, toPrice=${params['toPrice']}, sort=${params['sort']})}">
+                        &raquo;
+                    </a>
+                </li>
+
+            </ul>
+            <p class="text-center text-muted small">
+                Trang <strong th:text="${currentPage}"></strong> /
+                <strong th:text="${totalPages}"></strong>
+            </p>
+        </nav>
+
+    </div><!-- /container-fluid -->
+
+    <div th:replace="~{base :: footer}"></div>
+</body>
+</html>

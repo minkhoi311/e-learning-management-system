@@ -1,7 +1,7 @@
 USE elearningdb;
 
 -- --------------------------------------------------------
--- 1. Bảng Category (Đã bỏ cột description)
+-- 1. Bảng Category
 -- --------------------------------------------------------
 INSERT INTO category (id, name) VALUES
 (1, 'Lập trình & CNTT'),
@@ -12,18 +12,18 @@ INSERT INTO category (id, name) VALUES
 
 -- --------------------------------------------------------
 -- 2. Bảng User
--- Chú ý: password đang NOT NULL nên tài khoản Google cũng phải có chuỗi dummy
+-- Đã thêm first_name, last_name, phone. 
 -- --------------------------------------------------------
-INSERT INTO user (id, email, password, full_name, avatar, role, is_staff, is_active, auth_provider) VALUES
-(1, 'admin@eduspace.vn', '$2a$10$dummyHash123', 'Hệ Thống Quản Trị', 'admin_avatar.png', 'ADMIN', TRUE, TRUE, 'LOCAL'),
-(2, 'tech.lead@gmail.com', '$2a$10$dummyHash123', 'Hoàng Công Nghệ', 'gv_tech.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
-(3, 'designer.pro@gmail.com', '$2a$10$dummyHash123', 'Lê Mỹ Thuật', 'gv_design.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
-(4, 'ceo.startup@gmail.com', '$2a$10$dummyHash123', 'Trần Doanh Nhân', 'gv_biz.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
-(5, 'student.active@gmail.com', '$2a$10$dummyHash123', 'Nguyễn Học Chăm', 'sv_active.png', 'STUDENT', FALSE, TRUE, 'LOCAL'),
-(6, 'student.casual@yahoo.com', '$2a$10$dummyOAuthHash', 'Phạm Giải Trí', 'sv_casual.png', 'STUDENT', FALSE, TRUE, 'GOOGLE');
+INSERT INTO user (id, first_name, last_name, full_name, email, password, phone, avatar, role, is_staff, is_active, auth_provider) VALUES
+(1, 'Quản Trị', 'Hệ Thống', 'Hệ Thống Quản Trị', 'admin@eduspace.vn', '$2a$10$dummyHash123', '0901234567', 'admin_avatar.png', 'ADMIN', TRUE, TRUE, 'LOCAL'),
+(2, 'Công Nghệ', 'Hoàng', 'Hoàng Công Nghệ', 'tech.lead@gmail.com', '$2a$10$dummyHash123', '0987654321', 'gv_tech.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
+(3, 'Mỹ Thuật', 'Lê', 'Lê Mỹ Thuật', 'designer.pro@gmail.com', '$2a$10$dummyHash123', '0912345678', 'gv_design.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
+(4, 'Doanh Nhân', 'Trần', NULL, 'ceo.startup@gmail.com', '$2a$10$dummyHash123', '0933445566', 'gv_biz.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'), -- Test trường hợp full_name rỗng
+(5, 'Học Chăm', 'Nguyễn', 'Nguyễn Học Chăm', 'student.active@gmail.com', '$2a$10$dummyHash123', '0966778899', 'sv_active.png', 'STUDENT', FALSE, TRUE, 'LOCAL'),
+(6, 'Giải Trí', 'Phạm', 'Phạm Giải Trí', 'student.casual@yahoo.com', '$2a$10$dummyOAuthHash', NULL, 'sv_casual.png', 'STUDENT', FALSE, TRUE, 'GOOGLE'); -- Test phone rỗng (NULL)
 
 -- --------------------------------------------------------
--- 3. Bảng Course (Sử dụng 'subject' thay vì 'title')
+-- 3. Bảng Course
 -- --------------------------------------------------------
 INSERT INTO course (id, subject, description, image, price, duration_hours, category_id, instructor_id, is_active) VALUES
 (1, 'Python & Data Analysis toàn tập', 'Học cách phân tích dữ liệu kinh doanh với Pandas và NumPy.', 'python_data.jpg', 1200000, 35.5, 1, 2, TRUE),
@@ -32,7 +32,7 @@ INSERT INTO course (id, subject, description, image, price, duration_hours, cate
 (4, 'Kỹ năng Quản Lý Thời Gian & Hiệu Suất', 'Phương pháp Pomodoro, ma trận Eisenhower.', 'time_manage.jpg', 0, 5.0, 5, 4, TRUE);
 
 -- --------------------------------------------------------
--- 4. Bảng Lesson (Sử dụng 'subject' thay vì 'title')
+-- 4. Bảng Lesson
 -- --------------------------------------------------------
 INSERT INTO lesson (id, subject, content, image, course_id, is_active) VALUES
 (1, 'Cài đặt môi trường Python & Jupyter', '<p>Hướng dẫn chi tiết cách cài đặt Anaconda và thư viện cần thiết.</p>', 'lesson_py1.jpg', 1, TRUE),
@@ -41,7 +41,7 @@ INSERT INTO lesson (id, subject, content, image, course_id, is_active) VALUES
 (4, 'Ma trận Eisenhower là gì?', '<p>Phân biệt giữa việc Quan trọng và việc Khẩn cấp.</p>', 'lesson_soft1.jpg', 4, TRUE);
 
 -- --------------------------------------------------------
--- 5. Bảng lesson_comment (Đã đổi tên bảng)
+-- 5. Bảng lesson_comment
 -- --------------------------------------------------------
 INSERT INTO lesson_comment (id, content, lesson_id, user_id) VALUES
 (1, 'Bài này giảng rất dễ hiểu, đặc biệt là phần phân tích data.', 2, 5),

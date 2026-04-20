@@ -20,12 +20,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Set;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -65,7 +67,7 @@ public class Course implements Serializable {
     private String image;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "price")
-    private BigDecimal price;
+    private Double price;
     @Column(name = "duration_hours")
     private Double durationHours;
     @Column(name = "is_active")
@@ -89,6 +91,9 @@ public class Course implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseId")
     private Set<Enrollment> enrollmentSet;
 
+    @Transient
+    private MultipartFile file;
+    
     public Course() {
     }
 
@@ -133,11 +138,11 @@ public class Course implements Serializable {
         this.image = image;
     }
 
-    public BigDecimal getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -236,6 +241,20 @@ public class Course implements Serializable {
     @Override
     public String toString() {
         return "com.lmk.pojo.Course[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the file
+     */
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    /**
+     * @param file the file to set
+     */
+    public void setFile(MultipartFile file) {
+        this.file = file;
     }
     
 }

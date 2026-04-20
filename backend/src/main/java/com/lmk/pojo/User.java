@@ -32,9 +32,13 @@ import java.util.Set;
 @NamedQueries({
     @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
     @NamedQuery(name = "User.findById", query = "SELECT u FROM User u WHERE u.id = :id"),
+    @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username"),
+    @NamedQuery(name = "User.findByFirstName", query = "SELECT u FROM User u WHERE u.firstName = :firstName"),
+    @NamedQuery(name = "User.findByLastName", query = "SELECT u FROM User u WHERE u.lastName = :lastName"),
+    @NamedQuery(name = "User.findByFullName", query = "SELECT u FROM User u WHERE u.fullName = :fullName"),
     @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
     @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password"),
-    @NamedQuery(name = "User.findByFullName", query = "SELECT u FROM User u WHERE u.fullName = :fullName"),
+    @NamedQuery(name = "User.findByPhone", query = "SELECT u FROM User u WHERE u.phone = :phone"),
     @NamedQuery(name = "User.findByAvatar", query = "SELECT u FROM User u WHERE u.avatar = :avatar"),
     @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.role = :role"),
     @NamedQuery(name = "User.findByIsStaff", query = "SELECT u FROM User u WHERE u.isStaff = :isStaff"),
@@ -50,6 +54,24 @@ public class User implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "username")
+    private String username;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "first_name")
+    private String firstName;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "last_name")
+    private String lastName;
+    @Size(max = 255)
+    @Column(name = "full_name")
+    private String fullName;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Basic(optional = false)
     @NotNull
@@ -61,11 +83,10 @@ public class User implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "password")
     private String password;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "full_name")
-    private String fullName;
+    // @Pattern(regexp="^\\(?(\\d{3})\\)?[- ]?(\\d{3})[- ]?(\\d{4})$", message="Invalid phone/fax format, should be as xxx-xxx-xxxx")//if the field contains phone or fax number consider using this annotation to enforce field validation
+    @Size(max = 20)
+    @Column(name = "phone")
+    private String phone;
     @Size(max = 500)
     @Column(name = "avatar")
     private String avatar;
@@ -103,11 +124,13 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    public User(Integer id, String email, String password, String fullName, String role) {
+    public User(Integer id, String username, String firstName, String lastName, String email, String password, String role) {
         this.id = id;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.fullName = fullName;
         this.role = role;
     }
 
@@ -117,6 +140,38 @@ public class User implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getEmail() {
@@ -135,12 +190,12 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getAvatar() {

@@ -1,40 +1,67 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Phát triển hệ thống web ngày 4.4</title>
-    <th:block th:replace="base :: css"></th:block>
+<head>
+    <title>Quản lý Khóa học</title>
+    <th:block th:replace="~{base :: css}"></th:block>
 </head>
 <body>
-    <div th:replace="base :: header"></div>
+    <div th:replace="~{base :: header}"></div>
 
-    <section class="container">
-        <div class="mt-2">
-            <a th:href="@{/admin/products}" class="btn btn-info">Thêm sản phẩm</a>
+    <section class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="text-primary">Danh sách Khóa học</h2>
+            <a th:href="@{/admin/courses/add}" class="btn btn-success">
+                + Thêm khóa học mới
+            </a>
         </div>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Tên sản phẩm</th>
-                    <th>Giá bán</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="p: ${products}">
-                    <td>
-                        <img th:src="${p.image}" alt="alt" width="200"/>
-                    </td>
-                    <td th:text="${p.name}"></td>
-                    <td th:text="${p.price} + 'VND'"></td>
-                    <td>
-                        <a href="#" class="btn btn-info">Cập nhật</a>
-                        <button class="btn btn-danger">Xóa</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
 
-    <div th:replace="base :: footer"></div>     
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">Ảnh</th>
+                        <th>Tên khóa học</th>
+                        <th>Danh mục</th>
+                        <th>Giảng viên</th>
+                        <th>Học phí (VNĐ)</th>
+                        <th>Thời lượng (h)</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c: ${courses}">
+                        <td class="text-center">
+                            <img th:src="${c.image}" alt="Course Image" class="img-thumbnail" style="width: 120px; height: auto;" />
+                        </td>
+                        <td class="fw-bold" th:text="${c.subject}"></td>
+                        
+                        <td th:text="${c.category.name}"></td>
+                        <td th:text="${c.instructor.lastName + ' ' + c.instructor.firstName}"></td>
+                        
+                        <td th:text="${#numbers.formatDecimal(c.price, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td th:text="${c.durationHours}"></td>
+                        
+                        <td class="text-center">
+                            <span th:if="${c.isActive}" class="badge bg-primary">Đang mở</span>
+                            <span th:unless="${c.isActive}" class="badge bg-secondary">Tạm khóa</span>
+                        </td>
+                        
+                        <td class="text-center">
+                            <a th:href="@{/admin/courses/update/{id}(id=${c.id})}" class="btn btn-sm btn-info text-white mb-1">Sửa</a>
+                            <button class="btn btn-sm btn-danger mb-1">Xóa</button>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(courses)}">
+                        <td colspan="8" class="text-center text-muted">Chưa có khóa học nào trong hệ thống.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        </section>
+
+    <div th:replace="~{base :: footer}"></div>     
 </body>
 </html>

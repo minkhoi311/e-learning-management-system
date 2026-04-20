@@ -1,0 +1,146 @@
+package com.lmk.repositories.impl;
+
+import com.lmk.pojo.Course;
+import com.lmk.repositories.CourseRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+@Repository
+@Transactional
+public class CourseRepositoryImpl implements CourseRepository{
+
+    @Autowired
+    private LocalSessionFactoryBean factory;
+    
+    @Autowired
+    private Environment env;
+    
+    private List<Predicate> buildPredicates(CriteriaBuilder b, Root<Course> root, Map<String, String> params) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (params == null) return predicates;
+
+        // Tìm kiếm theo tên (không phân biệt hoa thường)
+        String kw = params.get("kw");
+        if (kw != null && !kw.isEmpty()) {
+            predicates.add(b.like(b.lower(root.get("subject")), "%" + kw.toLowerCase().trim() + "%"));
+        }
+
+        // Lọc theo danh mục
+        String cateId = params.get("cateId");
+        if (cateId != null && !cateId.isEmpty()) {
+            predicates.add(b.equal(root.get("categoryId").as(Integer.class), cateId));
+        }
+
+        // Lọc từ giá
+        String fromPrice = params.get("fromPrice");
+        if (fromPrice != null && !fromPrice.isEmpty()) {
+            predicates.add(b.greaterThanOrEqualTo(root.get("price"), Double.parseDouble(fromPrice)));
+        }
+
+        // Lọc đến giá
+        String toPrice = params.get("toPrice");
+        if (toPrice != null && !toPrice.isEmpty()) {
+            predicates.add(b.lessThanOrEqualTo(root.get("price"), Double.parseDouble(toPrice)));
+        }
+
+        // Lọc theo trạng thái (isActive)
+        String active = params.get("isActive");
+        if (active != null && !active.isEmpty()) {
+            predicates.add(b.equal(root.get("isActive"), Boolean.parseBoolean(active)));
+        }
+
+        return predicates;
+    }
+    
+    @Override
+    public List<Course> getCourses(Map<String, String> params){
+        Session session = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Course> q = b.createQuery(Course.class);
+        Root root = q.from(Course.class);
+        q.select(root);
+        
+        // Áp dụng bộ lọc
+        List<Predicate> predicates = buildPredicates(b, root, params);
+        if (!predicates.isEmpty()) {
+            q.where(predicates.toArray(Predicate[]::new));
+        }
+        
+        // Sắp xếp
+        if (params != null) {
+            String sort = params.getOrDefault("sort", "newest");
+            switch (sort) {
+                case "price_asc"  -> q.orderBy(b.asc(root.get("price")));
+                case "price_desc" -> q.orderBy(b.desc(root.get("price")));
+                case "name_asc"   -> q.orderBy(b.asc(root.get("subject")));
+                default           -> q.orderBy(b.desc(root.get("createdTime")));
+            }
+        }
+
+        Query<Course> query = session.createQuery(q);
+        
+        if (params != null){
+            int pageSize = this.env.getProperty("courses.page_size", Integer.class);
+            int page = Integer.parseInt(params.getOrDefault("page", "1"));
+            int start = (page - 1) * pageSize;
+
+            query.setMaxResults(pageSize);
+            query.setFirstResult(start);
+        }
+        return query.getResultList();
+        
+    }
+    
+    @Override
+    public Course getCourseById(int id) {
+        Session session = this.factory.getObject().getCurrentSession();
+        return session.get(Course.class, id);
+    }
+    
+    @Override
+    public void addOrUpdateCourse(Course c) {
+        Session session = this.factory.getObject().getCurrentSession();
+        if (c.getId() != null) {
+            session.merge(c);
+        } else {
+            session.persist(c);
+        }
+    }
+    
+    @Override
+    public boolean deleteCourse(int id) {
+        Session session = this.factory.getObject().getCurrentSession();
+        Course course = session.get(Course.class, id);
+        if (course == null) return false;
+        session.remove(course);
+        return true;
+    }
+    
+    @Override
+    public Long countCourse(Map<String, String> params) {
+        Session session = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Course> root = q.from(Course.class);
+        q.select(b.count(root));
+
+        List<Predicate> predicates = buildPredicates(b, root, params);
+        if (!predicates.isEmpty()) {
+            q.where(predicates.toArray(Predicate[]::new));
+        }
+
+        return session.createQuery(q).getSingleResult();
+    }
+}

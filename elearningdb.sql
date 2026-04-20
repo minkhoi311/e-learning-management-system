@@ -11,9 +11,12 @@ CREATE TABLE category (
 -- 2. Bảng User
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL, -- Thêm trường first_name
+    last_name VARCHAR(255) NOT NULL,  -- Thêm trường last_name
+    full_name VARCHAR(255) NULL,      -- Đã sửa thành cho phép rỗng (NULL)
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL, 
-    full_name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NULL,           -- Thêm trường phone
     avatar VARCHAR(500) NULL,
     role ENUM('ADMIN', 'INSTRUCTOR', 'STUDENT') NOT NULL,
     is_staff BOOLEAN DEFAULT FALSE,

@@ -4,88 +4,35 @@
  */
 package com.lmk.services.impl;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.lmk.pojo.User;
-import com.lmk.repositories.UserRepository;
+import com.lmk.repositories.UserReposity;
 import com.lmk.services.UserService;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
- * @author admin
+ * @author Acer
  */
-@Service("userDetailsService")
-public class UserServiceImpl implements UserService {
-
+@Service
+public class UserServiceImpl implements UserService{
+    
     @Autowired
-    private UserRepository userRepo;
-
-    @Autowired
-    private Cloudinary cloudinary;
-
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
+    private UserReposity userRepo;
+    
     @Override
     public User getUserByUsername(String username) {
         return this.userRepo.getUserByUsername(username);
     }
 
     @Override
-    public User addUser(Map<String, String> params, MultipartFile avatar) {
-        User u = new User();
-        u.setFirstName(params.get("firstName"));
-        u.setLastName(params.get("lastName"));
-        u.setPhone(params.get("phone"));
-        u.setEmail(params.get("phone"));
-        u.setUsername(params.get("username"));
-        u.setPassword(passwordEncoder.encode(params.get("password")));
-        u.setRole("STUDENT");
-
-        if (!avatar.isEmpty()) {
-            try {
-                Map res = this.cloudinary.uploader().upload(avatar.getBytes(),
-                        ObjectUtils.asMap("resource_type", "auto"));
-                u.setAvatar(res.get("secure_url").toString());
-            } catch (IOException ex) {
-//                Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
+    public User addUser(User u) {
         return this.userRepo.addUser(u);
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = this.userRepo.getUserByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("Không tồn tại!");
-        }
-        
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority(user.getRole()));
-        
-        return new org.springframework.security.core.userdetails.User(user.getUsername(),
-                user.getPassword(), authorities);
+    public List<User> getUsersByRole(String role) {
+        return this.userRepo.getUsersByRole(role);
     }
-
-    @Override
-    public boolean authenticate(String username, String password) {
-        return this.userRepo.authenticate(username, password);
-    }
-
 }

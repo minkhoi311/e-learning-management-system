@@ -10,6 +10,7 @@ import com.lmk.pojo.Course;
 import com.lmk.repositories.CourseRepository;
 import com.lmk.services.CourseService;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public void addOrUpdateCourse(Course c) {
-        if (!c.getFile().isEmpty()) {
+        // 1. XỬ LÝ UPLOAD ẢNH (NẾU CÓ)
+        if (c.getFile() != null && !c.getFile().isEmpty()) {
             try {
                 Map res = this.cloudinary.uploader().upload(c.getFile().getBytes(),
                         ObjectUtils.asMap("resource_type", "auto"));
@@ -50,12 +52,41 @@ public class CourseServiceImpl implements CourseService {
                 Logger.getLogger(CourseServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
+
+        // 2. VALIDATE DỮ LIỆU
         Map<String, String> errors = validate(c);
-        if (!errors.isEmpty()) 
+        if (!errors.isEmpty()) {
             return;
-        
-        this.courseRepo.addOrUpdateCourse(c);
+        }
+
+        // 3. PHÂN NHÁNH THÊM MỚI HAY CẬP NHẬT
+        if (c.getId() != null) {
+            // ======= THAO TÁC CẬP NHẬT =======
+            Course existingCourse = courseRepo.getCourseById(c.getId());
+
+            // Copy các trường từ form sang object cũ
+            existingCourse.setSubject(c.getSubject());
+            existingCourse.setPrice(c.getPrice());
+            existingCourse.setDescription(c.getDescription());
+            existingCourse.setCategoryId(c.getCategoryId());
+            existingCourse.setInstructorId(c.getInstructorId());
+            existingCourse.setUpdatedTime(new Date());
+            existingCourse.setDurationHours(c.getDurationHours());
+            existingCourse.setIsActive(c.getIsActive());
+
+            // Cập nhật ảnh NẾU người dùng có chọn ảnh mới
+            if (c.getImage() != null && !c.getImage().isEmpty()) {
+                existingCourse.setImage(c.getImage());
+            }
+
+            // Gọi Repo để lưu object ĐÃ CẬP NHẬT
+            this.courseRepo.addOrUpdateCourse(existingCourse);
+
+        } else {
+            // ======= THAO TÁC THÊM MỚI =======
+            c.setCreatedTime(new Date());
+            this.courseRepo.addOrUpdateCourse(c);
+        }
     }
 
     @Override
@@ -65,7 +96,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Long countCourse(Map<String, String> params) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return this.courseRepo.countCourse(params);
     }
 
     @Override
@@ -82,7 +113,7 @@ public class CourseServiceImpl implements CourseService {
         // Kiểm tra học phí
         if (course.getPrice() == null) {
             errors.put("price", "Học phí không được để trống (nhập 0 nếu miễn phí).");
-        } else if (course.getPrice() <  0) {
+        } else if (course.getPrice() < 0) {
             errors.put("price", "Học phí không được là số âm.");
         }
 

@@ -1,67 +1,77 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Quản lý Khóa học</title>
+    <title>Trang chủ - Hệ thống E-Learning</title>
     <th:block th:replace="~{base :: css}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-light">
     <div th:replace="~{base :: header}"></div>
+    <div class="container mt-5">
+        <div class="p-5 bg-white shadow-sm text-center" style="border-radius: 20px; border: none;">
+            
+            <div class="mb-4">
+                <th:block th:if="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}">
+                    <img th:src="${currentUser.avatar}" class="rounded-circle shadow" 
+                         style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #FF6B4A;">
+                </th:block>
+                
+                <th:block th:unless="${currentUser != null and currentUser.avatar != null and !currentUser.avatar.isEmpty()}">
+                    <div class="shadow" style="width: 120px; height: 120px; background: #eee; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #aaa; border: 4px solid #FF6B4A;">
+                        <i class="fa fa-user"></i>
+                    </div>
+                </th:block>
+            </div>
 
-    <section class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="text-primary">Danh sách Khóa học</h2>
-            <a th:href="@{/admin/courses/add}" class="btn btn-success">
-                + Thêm khóa học mới
-            </a>
+            <h1 class="display-4 fw-bold" style="color: #333;">
+                Xin chào, <span th:text="${currentUser != null ? currentUser.firstName : 'Khách'}"></span>!
+            </h1>
+
+            <p class="lead text-muted text-uppercase mt-2" style="letter-spacing: 1px;">
+                <th:block th:if="${currentUser != null}">
+                    <span th:if="${currentUser.role == 'ADMIN'}">QUẢN TRỊ VIÊN HỆ THỐNG</span>
+                    <span th:if="${currentUser.role == 'INSTRUCTOR'}">GIẢNG VIÊN</span>
+                    <span th:if="${currentUser.role == 'STUDENT'}">HỌC VIÊN</span>
+                </th:block>
+            </p>
+
+            <hr class="my-4 mx-auto" style="width: 100px; border-top: 3px solid #FF6B4A; opacity: 1;">
+
+            <p class="text-muted mb-5">Chào mừng bạn quay trở lại hệ thống E-Learning.</p>
+
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                
+                <th:block th:if="${currentUser != null and currentUser.role == 'ADMIN'}">
+                    <a th:href="@{/admin/stats}" class="btn text-white btn-lg px-4 rounded-pill shadow-sm" style="background-color: #FF6B4A; border-color: #FF6B4A;">
+                        <i class="fa fa-bar-chart me-2"></i> Xem báo cáo
+                    </a>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
+                        <i class="fa fa-users me-2"></i> Quản lý người dùng
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentUser != null and currentUser.role == 'INSTRUCTOR'}">
+                    <a th:href="@{/instructor/courses}" class="btn text-white btn-lg px-4 rounded-pill shadow-sm" style="background-color: #FF6B4A; border-color: #FF6B4A;">
+                        <i class="fa fa-book me-2"></i> Quản lý Khóa học
+                    </a>
+                    <a th:href="@{/instructor/students}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
+                        <i class="fa fa-users me-2"></i> Tiến độ Học viên
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentUser != null and currentUser.role == 'STUDENT'}">
+                    <a th:href="@{/courses}" class="btn text-white btn-lg px-4 rounded-pill shadow-sm" style="background-color: #FF6B4A; border-color: #FF6B4A;">
+                        <i class="fa fa-search me-2"></i> Tìm Khóa học mới
+                    </a>
+                    <a th:href="@{/my-enrollments}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
+                        <i class="fa fa-play-circle me-2"></i> Vào phòng học
+                    </a>
+                </th:block>
+
+            </div>
         </div>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="text-center">Ảnh</th>
-                        <th>Tên khóa học</th>
-                        <th>Danh mục</th>
-                        <th>Giảng viên</th>
-                        <th>Học phí (VNĐ)</th>
-                        <th>Thời lượng (h)</th>
-                        <th class="text-center">Trạng thái</th>
-                        <th class="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="c: ${courses}">
-                        <td class="text-center">
-                            <img th:src="${c.image}" alt="Course Image" class="img-thumbnail" style="width: 120px; height: auto;" />
-                        </td>
-                        <td class="fw-bold" th:text="${c.subject}"></td>
-                        
-                        <td th:text="${c.category.name}"></td>
-                        <td th:text="${c.instructor.lastName + ' ' + c.instructor.firstName}"></td>
-                        
-                        <td th:text="${#numbers.formatDecimal(c.price, 0, 'COMMA', 0, 'POINT')}"></td>
-                        <td th:text="${c.durationHours}"></td>
-                        
-                        <td class="text-center">
-                            <span th:if="${c.isActive}" class="badge bg-primary">Đang mở</span>
-                            <span th:unless="${c.isActive}" class="badge bg-secondary">Tạm khóa</span>
-                        </td>
-                        
-                        <td class="text-center">
-                            <a th:href="@{/admin/courses/update/{id}(id=${c.id})}" class="btn btn-sm btn-info text-white mb-1">Sửa</a>
-                            <button class="btn btn-sm btn-danger mb-1">Xóa</button>
-                        </td>
-                    </tr>
-                    
-                    <tr th:if="${#lists.isEmpty(courses)}">
-                        <td colspan="8" class="text-center text-muted">Chưa có khóa học nào trong hệ thống.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        </section>
-
-    <div th:replace="~{base :: footer}"></div>     
+    <div th:replace="~{base :: footer}"></div>
 </body>
 </html>

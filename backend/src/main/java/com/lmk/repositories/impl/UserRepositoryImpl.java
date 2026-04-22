@@ -5,28 +5,25 @@
 package com.lmk.repositories.impl;
 
 import com.lmk.pojo.User;
-import com.lmk.repositories.UserRepository;
+import com.lmk.repositories.UserReposity;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
- * @author huu-thanhduong
+ * @author Acer
  */
 @Repository
 @Transactional
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl implements UserReposity{
 
     @Autowired
     private LocalSessionFactoryBean factory;
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public User getUserByUsername(String username) {
@@ -42,21 +39,15 @@ public class UserRepositoryImpl implements UserRepository {
     public User addUser(User u) {
         Session session = this.factory.getObject().getCurrentSession();
         session.persist(u);
-        
         return u;
     }
 
     @Override
-    public boolean authenticate(String username, String password) {
-        User u = this.getUserByUsername(username);
+    public List<User> getUsersByRole(String role) {
+        Session session = this.factory.getObject().getCurrentSession();
 
-        return this.passwordEncoder.matches(password, u.getPassword());
-    }
-    
-    
-    @Override
-    public List<User> getInstructors() {
-        Session s = factory.getObject().getCurrentSession();
-        return s.createQuery("FROM User WHERE role = 'INSTRUCTOR'", User.class).getResultList();
+        Query<User> q = session.createQuery("FROM User WHERE role = :role", User.class);
+        q.setParameter("role", role);
+        return q.getResultList();
     }
 }

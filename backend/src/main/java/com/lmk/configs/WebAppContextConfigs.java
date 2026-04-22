@@ -4,7 +4,10 @@
  */
 package com.lmk.configs;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.lmk.formatters.CategoryFormatter;
+import com.lmk.formatters.UserFormatter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -39,12 +42,26 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addFormatter(new CategoryFormatter());
+        registry.addFormatter(new UserFormatter());
     }
 
     //Security
     @Bean
     public StandardServletMultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
+    }
+    
+    
+    //Khôi cloudinary
+    @Bean
+    public Cloudinary cloudinary() {
+        Cloudinary cloudinary
+                = new Cloudinary(ObjectUtils.asMap(
+                        "cloud_name", "dhin65fs8",
+                        "api_key", "198184884121951",
+                        "api_secret", "NWBqTXUf6LwdDRKLEW9Y1wqxbYA",
+                        "secure", true));
+        return cloudinary;
     }
 
     @Override

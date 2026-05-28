@@ -55,7 +55,7 @@ public class Payment implements Serializable {
     @Size(min = 1, max = 7)
     @Column(name = "payment_method")
     private String paymentMethod;
-    @Size(max = 8)
+    @Size(max = 7)
     @Column(name = "status")
     private String status;
     @Size(max = 255)

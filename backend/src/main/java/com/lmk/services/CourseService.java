@@ -14,9 +14,15 @@ import java.util.Map;
  */
 public interface CourseService {
     List<Course> getCourses(Map<String, String> params);
-    Course getCourseById(int id);
+    
+    public Course getCourseById(int id);
+    
+    public List<Course> getCoursesByIds(String ids);      
+    
     public void addOrUpdateCourse(Course c);
+    
     public boolean deleteCourse(int id);
+    
     public Long countCourse(Map<String, String> params);
     
     public Map<String, String> validate(Course c);

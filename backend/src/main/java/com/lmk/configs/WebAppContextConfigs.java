@@ -7,6 +7,7 @@ package com.lmk.configs;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.lmk.formatters.CategoryFormatter;
+import com.lmk.formatters.CourseFormatter;
 import com.lmk.formatters.UserFormatter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -43,6 +44,7 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         registry.addFormatter(new CategoryFormatter());
         registry.addFormatter(new UserFormatter());
+        registry.addFormatter(new CourseFormatter());
     }
 
     //Security

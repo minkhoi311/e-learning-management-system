@@ -19,21 +19,13 @@
                     <label class="form-label text-muted small fw-bold">Tên bài học</label>
                     <input type="text" class="form-control" name="kw" placeholder="Nhập từ khóa..." th:value="${param.kw}">
                 </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label for="course" class="form-label fw-bold">Thuộc khóa học: <span class="text-danger">*</span></label>
-
-                    <select class="form-select" name="courseId" id="course" required>
-                        <option value="">-- Chọn khóa học --</option>
-
-                        <option th:each="c: ${courses}" 
-                                th:value="${c.id}" 
-                                th:text="${c.subject}"
-                                th:selected="${lesson.courseId != null and lesson.courseId.id == c.id}">
-                        </option>
+                <div class="col-md-4">
+                    <label class="form-label text-muted small fw-bold">Thuộc khóa học</label>
+                    <select class="form-select" name="courseId">
+                        <option value="">-- Tất cả khóa học --</option>
+                        <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.subject}" th:selected="${param.courseId != null and param.courseId.toString() == c.id.toString()}"></option>
                     </select>
                 </div>
-                
                 <div class="col-md-2">
                     <label class="form-label text-muted small fw-bold">Trạng thái</label>
                     <select class="form-select" name="isActive">

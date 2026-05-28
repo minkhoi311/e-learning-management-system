@@ -1,0 +1,102 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.lmk.controllers;
+
+import com.lmk.pojo.Lesson;
+import com.lmk.pojo.LessonComment;
+import com.lmk.services.CourseService;
+import com.lmk.services.LessonCommentService;
+import com.lmk.services.LessonService;
+import com.lmk.utils.DaoUtils;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ *
+ * @author Acer
+ */
+
+@RestController
+@RequestMapping("/api")
+@CrossOrigin
+public class ApiLessonController {
+    @Autowired
+    private LessonService lessonService;
+    
+    @Autowired
+    private CourseService courseService;
+    
+    @Autowired
+    private LessonCommentService commentService;
+
+    @Autowired
+    private Environment env;
+
+    // GET /api/courses/{courseId}/lessons  — STUDENT (đã enroll), INSTRUCTOR, ADMIN
+    @GetMapping("/courses/{courseId}/lessons")
+    public ResponseEntity<List<Lesson>> listByCourse(
+            @PathVariable int courseId,
+            @RequestParam Map<String, String> params) {
+        params.put("courseId", String.valueOf(courseId));
+        params.put("isActive", "true");
+        return new ResponseEntity<>(this.lessonService.getLessons(params), HttpStatus.OK);
+    }
+
+    @GetMapping("/lessons/{lessonId}/comments")
+    public ResponseEntity<List<LessonComment>> listComments(@PathVariable int lessonId) {
+        return new ResponseEntity<>(this.commentService.getByLesson(lessonId), HttpStatus.OK);
+    }
+    
+    @PostMapping("/lessons/{lessonId}/comments")
+    public ResponseEntity<Object> addComment(
+            @PathVariable int lessonId,
+            @RequestBody Map<String, Object> body,
+            Principal principal) {
+        if (principal == null)
+            return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"), HttpStatus.UNAUTHORIZED);
+
+        String content = (String) body.get("content");
+        Integer parentId = body.get("parent_comment_id") != null
+                ? Integer.parseInt(body.get("parent_comment_id").toString()) : null;
+
+        LessonComment saved = this.commentService.add(lessonId, content, parentId, principal.getName());
+        if (saved == null)
+            return new ResponseEntity<>(Map.of("message", "Nội dung không được để trống!"), HttpStatus.BAD_REQUEST);
+
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    }
+    
+    
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Map<String, String>> deleteComment(
+            @PathVariable int commentId,
+            Principal principal) {
+        if (principal == null)
+            return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"), HttpStatus.UNAUTHORIZED);
+
+        boolean ok = this.commentService.delete(commentId, principal.getName());
+        if (!ok)
+            return new ResponseEntity<>(Map.of("message", "Không tìm thấy hoặc bạn không có quyền xóa!"), HttpStatus.FORBIDDEN);
+
+        return new ResponseEntity<>(Map.of("message", "Xóa bình luận thành công!"), HttpStatus.NO_CONTENT);
+    }
+}

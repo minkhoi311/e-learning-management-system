@@ -42,6 +42,8 @@ import org.springframework.web.multipart.MultipartFile;
     @NamedQuery(name = "Course.findByImage", query = "SELECT c FROM Course c WHERE c.image = :image"),
     @NamedQuery(name = "Course.findByPrice", query = "SELECT c FROM Course c WHERE c.price = :price"),
     @NamedQuery(name = "Course.findByDurationHours", query = "SELECT c FROM Course c WHERE c.durationHours = :durationHours"),
+    @NamedQuery(name = "Course.findByVideoUrl", query = "SELECT c FROM Course c WHERE c.videoUrl = :videoUrl"),
+    @NamedQuery(name = "Course.findByLevel", query = "SELECT c FROM Course c WHERE c.level = :level"),
     @NamedQuery(name = "Course.findByIsActive", query = "SELECT c FROM Course c WHERE c.isActive = :isActive"),
     @NamedQuery(name = "Course.findByCreatedTime", query = "SELECT c FROM Course c WHERE c.createdTime = :createdTime"),
     @NamedQuery(name = "Course.findByUpdatedTime", query = "SELECT c FROM Course c WHERE c.updatedTime = :updatedTime")})
@@ -67,9 +69,15 @@ public class Course implements Serializable {
     private String image;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "price")
-    private Double price;
+    private BigDecimal price;
     @Column(name = "duration_hours")
     private Double durationHours;
+    @Size(max = 500)
+    @Column(name = "video_url")
+    private String videoUrl;
+    @Size(max = 12)
+    @Column(name = "level")
+    private String level;
     @Column(name = "is_active")
     private Boolean isActive;
     @Column(name = "created_time")
@@ -78,8 +86,6 @@ public class Course implements Serializable {
     @Column(name = "updated_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseId")
-    private Set<CourseLike> courseLikeSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseId")
     private Set<Lesson> lessonSet;
     @JoinColumn(name = "category_id", referencedColumnName = "id")
@@ -90,9 +96,10 @@ public class Course implements Serializable {
     private User instructorId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseId")
     private Set<Enrollment> enrollmentSet;
-
+    
     @Transient
     private MultipartFile file;
+    
     
     public Course() {
     }
@@ -138,11 +145,11 @@ public class Course implements Serializable {
         this.image = image;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -152,6 +159,22 @@ public class Course implements Serializable {
 
     public void setDurationHours(Double durationHours) {
         this.durationHours = durationHours;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public Boolean getIsActive() {
@@ -176,14 +199,6 @@ public class Course implements Serializable {
 
     public void setUpdatedTime(Date updatedTime) {
         this.updatedTime = updatedTime;
-    }
-
-    public Set<CourseLike> getCourseLikeSet() {
-        return courseLikeSet;
-    }
-
-    public void setCourseLikeSet(Set<CourseLike> courseLikeSet) {
-        this.courseLikeSet = courseLikeSet;
     }
 
     public Set<Lesson> getLessonSet() {

@@ -10,6 +10,7 @@ import com.lmk.pojo.Course;
 import com.lmk.repositories.CourseRepository;
 import com.lmk.services.CourseService;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -78,12 +79,9 @@ public class CourseServiceImpl implements CourseService {
             if (c.getImage() != null && !c.getImage().isEmpty()) {
                 existingCourse.setImage(c.getImage());
             }
-
-            // Gọi Repo để lưu object ĐÃ CẬP NHẬT
             this.courseRepo.addOrUpdateCourse(existingCourse);
 
         } else {
-            // ======= THAO TÁC THÊM MỚI =======
             c.setCreatedTime(new Date());
             this.courseRepo.addOrUpdateCourse(c);
         }
@@ -113,7 +111,7 @@ public class CourseServiceImpl implements CourseService {
         // Kiểm tra học phí
         if (course.getPrice() == null) {
             errors.put("price", "Học phí không được để trống (nhập 0 nếu miễn phí).");
-        } else if (course.getPrice() < 0) {
+        } else if (course.getPrice().compareTo(BigDecimal.ZERO)< 0) {
             errors.put("price", "Học phí không được là số âm.");
         }
 
@@ -126,7 +124,11 @@ public class CourseServiceImpl implements CourseService {
         if (course.getInstructorId() == null) {
             errors.put("instructor", "Vui lòng chọn giảng viên phụ trách.");
         }
-
         return errors;
+    }
+
+    @Override
+    public List<Course> getCoursesByIds(String ids) {
+        return this.getCoursesByIds(ids);
     }
 }

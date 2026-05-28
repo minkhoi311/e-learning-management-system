@@ -17,11 +17,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -41,7 +43,8 @@ import java.util.Set;
     @NamedQuery(name = "User.findByPhone", query = "SELECT u FROM User u WHERE u.phone = :phone"),
     @NamedQuery(name = "User.findByAvatar", query = "SELECT u FROM User u WHERE u.avatar = :avatar"),
     @NamedQuery(name = "User.findByRole", query = "SELECT u FROM User u WHERE u.role = :role"),
-    @NamedQuery(name = "User.findByIsStaff", query = "SELECT u FROM User u WHERE u.isStaff = :isStaff"),
+    @NamedQuery(name = "User.findByIsInstructor", query = "SELECT u FROM User u WHERE u.isInstructor = :isInstructor"),
+    @NamedQuery(name = "User.findByIsAdmin", query = "SELECT u FROM User u WHERE u.isAdmin = :isAdmin"),
     @NamedQuery(name = "User.findByIsActive", query = "SELECT u FROM User u WHERE u.isActive = :isActive"),
     @NamedQuery(name = "User.findByAuthProvider", query = "SELECT u FROM User u WHERE u.authProvider = :authProvider"),
     @NamedQuery(name = "User.findByCreatedTime", query = "SELECT u FROM User u WHERE u.createdTime = :createdTime"),
@@ -95,11 +98,13 @@ public class User implements Serializable {
     @Size(min = 1, max = 10)
     @Column(name = "role")
     private String role;
-    @Column(name = "is_staff")
-    private Boolean isStaff;
+    @Column(name = "is_instructor")
+    private Boolean isInstructor;
+    @Column(name = "is_admin")
+    private Boolean isAdmin;
     @Column(name = "is_active")
     private Boolean isActive;
-    @Size(max = 8)
+    @Size(max = 6)
     @Column(name = "auth_provider")
     private String authProvider;
     @Column(name = "created_time")
@@ -108,14 +113,18 @@ public class User implements Serializable {
     @Column(name = "updated_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private Set<CourseLike> courseLikeSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "instructorId")
     private Set<Course> courseSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
     private Set<LessonComment> lessonCommentSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "studentId")
     private Set<Enrollment> enrollmentSet;
+    
+    
+    @Transient
+    private MultipartFile file;
+    
+    
 
     public User() {
     }
@@ -214,12 +223,20 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    public Boolean getIsStaff() {
-        return isStaff;
+    public Boolean getIsInstructor() {
+        return isInstructor;
     }
 
-    public void setIsStaff(Boolean isStaff) {
-        this.isStaff = isStaff;
+    public void setIsInstructor(Boolean isInstructor) {
+        this.isInstructor = isInstructor;
+    }
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 
     public Boolean getIsActive() {
@@ -252,14 +269,6 @@ public class User implements Serializable {
 
     public void setUpdatedTime(Date updatedTime) {
         this.updatedTime = updatedTime;
-    }
-
-    public Set<CourseLike> getCourseLikeSet() {
-        return courseLikeSet;
-    }
-
-    public void setCourseLikeSet(Set<CourseLike> courseLikeSet) {
-        this.courseLikeSet = courseLikeSet;
     }
 
     public Set<Course> getCourseSet() {
@@ -309,6 +318,20 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "com.lmk.pojo.User[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the file
+     */
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    /**
+     * @param file the file to set
+     */
+    public void setFile(MultipartFile file) {
+        this.file = file;
     }
     
 }

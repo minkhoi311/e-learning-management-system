@@ -15,18 +15,19 @@ CREATE TABLE category (
 -- 2. Bảng User (Đã thêm username)
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE, -- Bổ sung trường username
+    username VARCHAR(255) NOT NULL UNIQUE,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL, 
+    password VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NULL,
     avatar VARCHAR(500) NULL,
     role ENUM('ADMIN', 'INSTRUCTOR', 'STUDENT') NOT NULL,
-    is_staff BOOLEAN DEFAULT FALSE,
+    is_instructor BOOLEAN DEFAULT FALSE,
+    is_admin BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
-    auth_provider ENUM('LOCAL', 'GOOGLE', 'FACEBOOK') DEFAULT 'LOCAL',
+    auth_provider ENUM('LOCAL', 'GOOGLE') DEFAULT 'LOCAL',
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -41,6 +42,8 @@ CREATE TABLE course (
     duration_hours DOUBLE,
     category_id INT NULL,
     instructor_id INT NOT NULL,
+    video_url VARCHAR(500) NULL,
+    level ENUM('BEGINNER', 'INTERMEDIATE', 'ADVANCED') DEFAULT 'BEGINNER',
     is_active BOOLEAN DEFAULT TRUE,
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -55,13 +58,15 @@ CREATE TABLE lesson (
     content TEXT,
     image VARCHAR(500),
     course_id INT NOT NULL,
+    video_url VARCHAR(500) NULL,
+    order_index INT DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_lesson_course FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE
 );
 
--- 5. Bảng Comment (Bình luận & Phản hồi)
+-- 5. Bảng Lesson Comment (Bình luận bài học)
 CREATE TABLE lesson_comment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content TEXT NOT NULL,
@@ -73,18 +78,7 @@ CREATE TABLE lesson_comment (
     CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- 6. Bảng Course_Like (Quản lý Like theo cách chuẩn hóa)
-CREATE TABLE course_like (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    course_id INT NOT NULL,
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_like_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-    CONSTRAINT fk_like_course FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE,
-    CONSTRAINT uq_user_course_like UNIQUE (user_id, course_id)
-);
-
--- 7. Bảng Enrollment (Đăng ký học)
+-- 6. Bảng Enrollment (Đăng ký học)
 CREATE TABLE enrollment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     progress_percent DOUBLE DEFAULT 0.0,
@@ -96,7 +90,7 @@ CREATE TABLE enrollment (
     CONSTRAINT uq_student_course UNIQUE (student_id, course_id)
 );
 
--- 8. Bảng Lesson_Progress (Tiến độ chi tiết từng bài học)
+-- 7. Bảng Lesson_Progress (Tiến độ chi tiết từng bài học)
 CREATE TABLE lesson_progress (
     id INT AUTO_INCREMENT PRIMARY KEY,
     is_completed BOOLEAN DEFAULT FALSE,
@@ -105,23 +99,23 @@ CREATE TABLE lesson_progress (
     completed_time TIMESTAMP NULL,
     CONSTRAINT fk_progress_enrollment FOREIGN KEY (enrollment_id) REFERENCES enrollment(id) ON DELETE CASCADE,
     CONSTRAINT fk_progress_lesson FOREIGN KEY (lesson_id) REFERENCES lesson(id) ON DELETE CASCADE,
-    CONSTRAINT uq_enrollment_lesson UNIQUE (enrollment_id, lesson_id) 
+    CONSTRAINT uq_enrollment_lesson UNIQUE (enrollment_id, lesson_id)
 );
 
--- 9. Bảng Payment (Thanh toán)
+-- 8. Bảng Payment (Thanh toán)
 CREATE TABLE payment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     amount DECIMAL(10,2) NOT NULL,
-    payment_method ENUM('CASH', 'PAYPAL', 'STRIPE', 'MOMO', 'ZALOPAY') NOT NULL,
-    status ENUM('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED') DEFAULT 'PENDING',
+    payment_method ENUM('CASH', 'MOMO', 'ZALOPAY') NOT NULL,
+    status ENUM('PENDING', 'SUCCESS', 'FAILED') DEFAULT 'PENDING',
     transaction_reference VARCHAR(255) NULL,
-    enrollment_id INT NOT NULL UNIQUE, 
+    enrollment_id INT NOT NULL UNIQUE,
     paid_time TIMESTAMP NULL,
     CONSTRAINT fk_payment_enrollment FOREIGN KEY (enrollment_id) REFERENCES enrollment(id) ON DELETE CASCADE
 );
 
 -- ========================================================
--- PHẦN 2: DỮ LIỆU MẪU (SEED DATA)
+-- PHẦN 2: CHÈN DỮ LIỆU MẪU
 -- ========================================================
 
 -- 1. Thêm danh mục
@@ -132,14 +126,14 @@ INSERT INTO category (id, name) VALUES
 (4, 'Ngoại ngữ'),
 (5, 'Kỹ năng mềm');
 
--- 2. Thêm User (Đã map thêm giá trị cho cột 'username')
-INSERT INTO user (id, username, first_name, last_name, full_name, email, password, phone, avatar, role, is_staff, is_active, auth_provider) VALUES
-(1, 'admin_system', 'Quản Trị', 'Hệ Thống', 'Hệ Thống Quản Trị', 'admin@eduspace.vn', '$2a$10$dummyHash123', '0901234567', 'admin_avatar.png', 'ADMIN', TRUE, TRUE, 'LOCAL'),
-(2, 'hoang_tech', 'Công Nghệ', 'Hoàng', 'Hoàng Công Nghệ', 'tech.lead@gmail.com', '$2a$10$dummyHash123', '0987654321', 'gv_tech.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
-(3, 'le_design', 'Mỹ Thuật', 'Lê', 'Lê Mỹ Thuật', 'designer.pro@gmail.com', '$2a$10$dummyHash123', '0912345678', 'gv_design.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
-(4, 'tran_ceo', 'Doanh Nhân', 'Trần', NULL, 'ceo.startup@gmail.com', '$2a$10$dummyHash123', '0933445566', 'gv_biz.png', 'INSTRUCTOR', FALSE, TRUE, 'LOCAL'),
-(5, 'nguyen_active', 'Học Chăm', 'Nguyễn', 'Nguyễn Học Chăm', 'student.active@gmail.com', '$2a$10$dummyHash123', '0966778899', 'sv_active.png', 'STUDENT', FALSE, TRUE, 'LOCAL'),
-(6, 'pham_casual', 'Giải Trí', 'Phạm', 'Phạm Giải Trí', 'student.casual@yahoo.com', '$2a$10$dummyOAuthHash', NULL, 'sv_casual.png', 'STUDENT', FALSE, TRUE, 'GOOGLE');
+-- 2. Thêm User
+INSERT INTO user (id, username, first_name, last_name, full_name, email, password, phone, avatar, role, is_instructor, is_admin, is_active, auth_provider) VALUES
+(1, 'admin_system', 'Quản Trị', 'Hệ Thống', 'Hệ Thống Quản Trị', 'admin@eduspace.vn', '$2a$10$dummyHash123', '0901234567', 'admin_avatar.png', 'ADMIN', FALSE, TRUE, TRUE, 'LOCAL'),
+(2, 'hoang_tech', 'Công Nghệ', 'Hoàng', 'Hoàng Công Nghệ', 'tech.lead@gmail.com', '$2a$10$dummyHash123', '0987654321', 'gv_tech.png', 'INSTRUCTOR', TRUE, FALSE, TRUE, 'LOCAL'),
+(3, 'le_design', 'Mỹ Thuật', 'Lê', 'Lê Mỹ Thuật', 'designer.pro@gmail.com', '$2a$10$dummyHash123', '0912345678', 'gv_design.png', 'INSTRUCTOR', TRUE, FALSE, TRUE, 'LOCAL'),
+(4, 'tran_ceo', 'Doanh Nhân', 'Trần', NULL, 'ceo.startup@gmail.com', '$2a$10$dummyHash123', '0933445566', 'gv_biz.png', 'INSTRUCTOR', TRUE, FALSE, TRUE, 'LOCAL'),
+(5, 'nguyen_active', 'Học Chăm', 'Nguyễn', 'Nguyễn Học Chăm', 'student.active@gmail.com', '$2a$10$dummyHash123', '0966778899', 'sv_active.png', 'STUDENT', FALSE, FALSE, TRUE, 'LOCAL'),
+(6, 'pham_casual', 'Giải Trí', 'Phạm', 'Phạm Giải Trí', 'student.casual@yahoo.com', '$2a$10$dummyOAuthHash', NULL, 'sv_casual.png', 'STUDENT', FALSE, FALSE, TRUE, 'GOOGLE');
 
 -- 3. Thêm Khóa học
 INSERT INTO course (id, subject, description, image, price, duration_hours, category_id, instructor_id, is_active) VALUES
@@ -160,28 +154,22 @@ INSERT INTO lesson_comment (id, content, lesson_id, user_id) VALUES
 (1, 'Bài này giảng rất dễ hiểu, đặc biệt là phần phân tích data.', 2, 5),
 (2, 'Cho mình hỏi tỷ lệ 60-30-10 áp dụng cho app Dark Mode như thế nào?', 3, 6);
 
--- 6. Thêm Like Khóa học
-INSERT INTO course_like (id, user_id, course_id) VALUES
-(1, 5, 1),
-(2, 5, 3),
-(3, 6, 2),
-(4, 6, 4);
-
--- 7. Thêm Enrollment
+-- 6. Thêm Enrollment
 INSERT INTO enrollment (id, progress_percent, student_id, course_id) VALUES
 (1, 50.0, 5, 1),
 (2, 0.0, 6, 2),
 (3, 100.0, 6, 4);
 
--- 8. Thêm Lesson_Progress
+-- 7. Thêm Lesson_Progress
 INSERT INTO lesson_progress (id, is_completed, enrollment_id, lesson_id, completed_time) VALUES
 (1, TRUE, 1, 1, '2026-05-01 09:00:00'),
 (2, FALSE, 1, 2, NULL),
 (3, FALSE, 2, 3, NULL),
 (4, TRUE, 3, 4, '2026-05-10 15:30:00');
 
--- 9. Thêm Payment
+-- 8. Thêm Payment
+--    Đã sửa dòng thứ 2 từ STRIPE thành MOMO để khớp với enum cho phép
 INSERT INTO payment (id, amount, payment_method, status, transaction_reference, enrollment_id, paid_time) VALUES
 (1, 1200000, 'ZALOPAY', 'SUCCESS', 'ZLP_987654321', 1, '2026-04-20 10:15:00'),
-(2, 850000, 'STRIPE', 'PENDING', 'STRIPE_CH_112233', 2, NULL),
+(2, 850000, 'MOMO', 'PENDING', 'MOMO_CH_112233', 2, NULL),
 (3, 0, 'CASH', 'SUCCESS', 'FREE_COURSE_PROMO', 3, '2026-05-05 08:00:00');

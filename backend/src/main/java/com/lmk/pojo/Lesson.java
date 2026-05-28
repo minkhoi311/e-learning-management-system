@@ -39,6 +39,8 @@ import org.springframework.web.multipart.MultipartFile;
     @NamedQuery(name = "Lesson.findById", query = "SELECT l FROM Lesson l WHERE l.id = :id"),
     @NamedQuery(name = "Lesson.findBySubject", query = "SELECT l FROM Lesson l WHERE l.subject = :subject"),
     @NamedQuery(name = "Lesson.findByImage", query = "SELECT l FROM Lesson l WHERE l.image = :image"),
+    @NamedQuery(name = "Lesson.findByVideoUrl", query = "SELECT l FROM Lesson l WHERE l.videoUrl = :videoUrl"),
+    @NamedQuery(name = "Lesson.findByOrderIndex", query = "SELECT l FROM Lesson l WHERE l.orderIndex = :orderIndex"),
     @NamedQuery(name = "Lesson.findByIsActive", query = "SELECT l FROM Lesson l WHERE l.isActive = :isActive"),
     @NamedQuery(name = "Lesson.findByCreatedTime", query = "SELECT l FROM Lesson l WHERE l.createdTime = :createdTime"),
     @NamedQuery(name = "Lesson.findByUpdatedTime", query = "SELECT l FROM Lesson l WHERE l.updatedTime = :updatedTime")})
@@ -62,6 +64,11 @@ public class Lesson implements Serializable {
     @Size(max = 500)
     @Column(name = "image")
     private String image;
+    @Size(max = 500)
+    @Column(name = "video_url")
+    private String videoUrl;
+    @Column(name = "order_index")
+    private Integer orderIndex;
     @Column(name = "is_active")
     private Boolean isActive;
     @Column(name = "created_time")
@@ -77,10 +84,12 @@ public class Lesson implements Serializable {
     private Set<LessonProgress> lessonProgressSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "lessonId")
     private Set<LessonComment> lessonCommentSet;
-
+    
     
     @Transient
     private MultipartFile file;
+    
+
     public Lesson() {
     }
 
@@ -123,6 +132,22 @@ public class Lesson implements Serializable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 
     public Boolean getIsActive() {

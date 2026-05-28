@@ -1,0 +1,153 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cập nhật Người dùng</title>
+    <th:block th:replace="~{base :: css}"></th:block>
+</head>
+<body class="bg-light">
+    <div th:replace="~{base :: header}"></div>
+
+    <section class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9 col-md-10 bg-white p-4 shadow-sm rounded"> 
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-primary m-0" th:text="${user.id == null ? 'THÊM NGƯỜI DÙNG MỚI' : 'CẬP NHẬT THÔNG TIN'}">
+                        THÔNG TIN NGƯỜI DÙNG
+                    </h2>
+                    
+                    <span th:if="${user.id != null and !user.isActive}" class="badge bg-danger fs-6 p-2 shadow-sm">
+                        <i class="bi bi-lock-fill"></i> TÀI KHOẢN ĐANG BỊ KHÓA
+                    </span>
+                </div>
+
+                <form method="post" th:object="${user}" th:action="@{/admin/users/save}" enctype="multipart/form-data">
+                    
+                    <div class="row bg-light p-3 rounded mb-4 border">
+                        <h6 class="text-muted mb-3"><i class="bi bi-shield-lock"></i> Thông tin đăng nhập</h6>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label fw-bold">Tên đăng nhập (Username): <span class="text-danger">*</span></label>
+                            
+                            <input th:if="${user.id == null}" type="text" class="form-control" id="username" placeholder="Nhập username" th:field="*{username}" required />
+                            
+                            <input th:unless="${user.id == null}" type="text" class="form-control bg-secondary text-white bg-opacity-25" id="username" th:field="*{username}" readonly title="Không được phép sửa tên đăng nhập" />
+                        </div>
+
+                        <div class="col-md-6 mb-3" th:if="${user.id == null}">
+                            <label for="password" class="form-label fw-bold">Mật khẩu: <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" placeholder="Nhập mật khẩu" th:field="*{password}" required />
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted mb-3"><i class="bi bi-person-lines-fill"></i> Thông tin cá nhân & Phân quyền</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label fw-bold">Họ và đệm: <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lastName" placeholder="VD: Nguyễn Văn" th:field="*{lastName}" required />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label fw-bold">Tên: <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="firstName" placeholder="VD: A" th:field="*{firstName}" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label fw-bold">Số điện thoại: </label>
+                            <input type="tel" class="form-control" id="phone" placeholder="Nhập số điện thoại" th:field="*{phone}" />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="role" class="form-label fw-bold">Vai trò: <span class="text-danger">*</span></label>
+                            <select class="form-select" th:field="*{role}" id="role" required>
+                                <option value="STUDENT">Học viên</option>
+                                <option value="INSTRUCTOR">Giảng viên</option>
+                                <option value="ADMIN">Quản trị viên (Admin)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row bg-white border rounded p-3 mb-3 mx-0 shadow-sm border-start border-4 border-primary">
+                        <h6 class="text-primary mb-3"><i class="bi bi-sliders"></i> Quản lý Trạng thái & Cấp quyền</h6>
+                        
+                        <div class="col-md-4 d-flex flex-column justify-content-center">
+                            <div class="form-check form-switch fs-5">
+                                <input class="form-check-input" type="checkbox" id="isActive" th:field="*{isActive}">
+                                <label class="form-check-label fs-6 fw-bold" th:classappend="${user.id != null and !user.isActive} ? 'text-danger' : 'text-success'" for="isActive">
+                                    Đang hoạt động
+                                </label>
+                            </div>
+                            <small class="text-muted fst-italic">Tắt để khóa / Bật để mở khóa</small>
+                        </div>
+
+                        <div class="col-md-4 d-flex flex-column justify-content-center border-start px-4">
+                            <div class="form-check form-switch fs-5">
+                                <input class="form-check-input" type="checkbox" id="isInstructor" th:field="*{isInstructor}">
+                                <label class="form-check-label fs-6 text-warning text-dark fw-bold" for="isInstructor">
+                                    Duyệt Giảng viên
+                                </label>
+                            </div>
+                            <small class="text-muted fst-italic">Cấp quyền tạo khóa học</small>
+                        </div>
+
+                        <div class="col-md-4 d-flex flex-column justify-content-center border-start px-4">
+                            <div class="form-check form-switch fs-5">
+                                <input class="form-check-input" type="checkbox" id="isAdmin" th:field="*{isAdmin}">
+                                <label class="form-check-label fs-6 text-primary fw-bold" for="isAdmin">
+                                    Nhân viên
+                                </label>
+                            </div>
+                            <small class="text-muted fst-italic">Quyền truy cập nội bộ</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-4">
+                        <label for="file" class="form-label fw-bold">Ảnh đại diện (Avatar): </label>
+                        <input type="file" class="form-control" id="file" th:field="*{file}" accept="image/*" />
+                    </div>
+
+                    <div class="mb-4 p-3 border rounded text-center bg-light" th:if="${user.avatar != null and !user.avatar.isEmpty()}">
+                        <label class="form-label text-muted small d-block">Avatar hiện tại</label>
+                        <img th:src="${user.avatar}" class="rounded-circle border border-3 border-white shadow-sm" style="width: 100px; height: 100px; object-fit: cover;" />
+                    </div>
+
+                    <hr class="text-muted mt-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/admin/users}" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Trở về</a>
+                        <button th:if="${user.id == null}" type="submit" class="btn btn-success"><i class="bi bi-person-plus-fill"></i> Tạo tài khoản</button>
+                        <button th:unless="${user.id == null}" type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu thay đổi</button>
+                    </div>
+
+                    <input type="hidden" th:field="*{id}" />
+                    <input type="hidden" th:field="*{avatar}" />
+                </form>
+
+            </div>
+        </div>
+    </section>
+
+    <div th:replace="~{base :: footer}"></div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const roleSelect = document.getElementById("role");
+            const isInstructorToggle = document.getElementById("isInstructor");
+            
+            function handleInstructorToggle() {
+                if (roleSelect.value === 'STUDENT') {
+                    isInstructorToggle.checked = false; // Tắt công tắc
+                    isInstructorToggle.disabled = true; // Khóa mờ công tắc
+                } else {
+                    isInstructorToggle.disabled = false; // Mở lại cho Giảng Viên hoặc Admin
+                }
+            }
+
+            roleSelect.addEventListener("change", handleInstructorToggle);
+            handleInstructorToggle(); // Chạy khi load trang
+        });
+    </script>
+</body>
+</html>

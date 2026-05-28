@@ -4,15 +4,20 @@
  */
 package com.lmk.repositories;
 
-import com.lmk.pojo.User;
+import com.lmk.pojo.LessonComment;
 import java.util.List;
 
 /**
  *
  * @author Acer
  */
-public interface UserReposity {
-    public User getUserByUsername(String username);
-    public User addUser(User u);
-    public List<User> getUsersByRole(String role);
+
+public interface LessonCommentRepository {
+    public List<LessonComment> getByLesson(int lessonId);
+    
+    public LessonComment getById(int id);
+    
+    public LessonComment add(LessonComment c);
+    
+    public boolean delete(int id);
 }

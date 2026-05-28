@@ -6,6 +6,7 @@ package com.lmk.services;
 
 import com.lmk.pojo.User;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -13,9 +14,27 @@ import java.util.List;
  */
 public interface UserService {
 
+    public List<User> getUsers(Map<String, String> params);
+
+    public Long countUsers(Map<String, String> params);
+
+    public User getUserById(int id);
+    
     public User getUserByUsername(String username);
 
-    public User addUser(User u);
-
     public List<User> getUsersByRole(String role);
+
+    public User addUser(User user);
+
+    public User updateUser(User user);
+    
+    public User updateCurrentUser(User u, String username);
+    
+    public boolean changePassword(String username, String oldPassword, String newPassword);
+    
+    public boolean unActiveUser(int id);
+    
+    public boolean activeUser(int id);
+
+    public boolean approveInstructor(int id);
 }

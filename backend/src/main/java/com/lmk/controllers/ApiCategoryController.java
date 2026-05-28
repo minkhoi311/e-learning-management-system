@@ -30,4 +30,5 @@ public class ApiCategoryController {
     public ResponseEntity<List<Category>> list() {
         return new ResponseEntity<>(this.cateService.getCates(), HttpStatus.OK);
     }
+    
 }

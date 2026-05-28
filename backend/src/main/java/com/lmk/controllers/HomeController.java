@@ -6,6 +6,8 @@ package com.lmk.controllers;
 
 import com.lmk.services.CategoryService;
 import com.lmk.services.CourseService;
+import com.lmk.services.UserService;
+import java.security.Principal;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,7 +28,7 @@ public class HomeController {
     private CategoryService cateService;
     
     @Autowired
-    private CourseService courseService;
+    private UserService userService;
     
     @ModelAttribute
     public void commonResponses(Model model) {
@@ -34,7 +36,11 @@ public class HomeController {
     }
     
     @RequestMapping("/")
-    public String index(Model model ) {
+    public String index(Model model, Principal principal) {
+        if (principal != null) {
+            model.addAttribute("currentUser",
+                    this.userService.getUserByUsername(principal.getName()));
+        }
         return "index";
     }
 }

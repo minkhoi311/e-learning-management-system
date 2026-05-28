@@ -36,13 +36,11 @@ public class CourseRepositoryImpl implements CourseRepository {
             return predicates;
         }
 
-        // Tìm kiếm theo tên (không phân biệt hoa thường)
         String kw = params.get("kw");
         if (kw != null && !kw.isEmpty()) {
             predicates.add(b.like(b.lower(root.get("subject")), "%" + kw.toLowerCase().trim() + "%"));
         }
 
-        // Lọc theo danh mục
         String cateId = params.get("cateId");
         if (cateId != null && !cateId.isEmpty()) {
             predicates.add(b.equal(root.get("categoryId").as(Integer.class), cateId));
@@ -100,7 +98,7 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         Query<Course> query = session.createQuery(q);
 
-        if (params != null) {
+        if (params != null && params.containsKey("page")) {
             int pageSize = this.env.getProperty("courses.page_size", Integer.class);
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * pageSize;
@@ -116,6 +114,23 @@ public class CourseRepositoryImpl implements CourseRepository {
     public Course getCourseById(int id) {
         Session session = this.factory.getObject().getCurrentSession();
         return session.get(Course.class, id);
+    }
+    
+    @Override
+    public List<Course> getCoursesByIds(List<Integer> ids) {
+        Session session = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Course> q = b.createQuery(Course.class);
+
+        Root<Course> root = q.from(Course.class);
+
+        q.select(root);
+
+        q.where(root.get("id").in(ids));
+        
+        Query<Course> query = session.createQuery(q);
+
+        return query.getResultList();
     }
 
     @Override

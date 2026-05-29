@@ -13,11 +13,11 @@ import java.util.List;
  */
 
 public interface LessonCommentRepository {
-    public List<LessonComment> getByLesson(int lessonId);
+    List<LessonComment> getByLesson(int lessonId);
     
-    public LessonComment getById(int id);
+    LessonComment getById(int id);
     
-    public LessonComment add(LessonComment c);
+    LessonComment add(LessonComment c);
     
-    public boolean delete(int id);
+    boolean delete(int id);
 }

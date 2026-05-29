@@ -7,6 +7,7 @@ package com.lmk.controllers;
 import com.lmk.pojo.User;
 import com.lmk.services.UserService;
 import com.lmk.utils.DaoUtils;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class UserController {
 
         // Tính toán phân trang
         Long totalItems = userService.countUsers(params);
-        int pageSize = Integer.parseInt(env.getProperty("users.page_size", "1"));
+        int pageSize = Integer.parseInt(env.getProperty("users.page_size", "10"));
         int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
 
         model.addAttribute("totalPages", totalPages);
@@ -70,12 +71,11 @@ public class UserController {
 
     @PostMapping("/users/save")
     public String saveUser(@ModelAttribute("user") User user, RedirectAttributes redirectAttrs) {
-        User savedUser = null;
         if (user.getId() != null) {
-            savedUser = this.userService.updateUser(user);
+            this.userService.updateUser(user);
             redirectAttrs.addFlashAttribute("successMsg", "Cập nhật tài khoản thành công!");
         } else {
-            savedUser = this.userService.addUser(user);
+            this.userService.addUser(user);
             redirectAttrs.addFlashAttribute("successMsg", "Thêm người dùng thành công!");
         }
         return "redirect:/admin/users";
@@ -84,9 +84,23 @@ public class UserController {
 
     @GetMapping("/users/approvals")
     public String pendingApprovals(Model model) {
-        Map<String, String> params = Map.of("isIntrucotr", "false");
+        Map<String, String> params = new HashMap<>();
+        params.put("role", "INSTRUCTOR");
+        params.put("isInstructor", "false");
         List<User> pendingUsers = userService.getUsers(params);
         model.addAttribute("pendingUsers", pendingUsers);
         return "approve";
+    }
+    
+    @GetMapping("/users/approve/{id}")
+    public String approveInstructor(@PathVariable int id,
+                                    RedirectAttributes redirectAttrs) {
+        boolean ok = this.userService.approveInstructor(id);
+        if (ok) {
+            redirectAttrs.addFlashAttribute("successMsg", "Đã duyệt tài khoản giảng viên thành công!");
+        } else {
+            redirectAttrs.addFlashAttribute("errMsg", "Duyệt thất bại! Không tìm thấy hoặc không phải giảng viên.");
+        }
+        return "redirect:/admin/users/approvals";
     }
 }

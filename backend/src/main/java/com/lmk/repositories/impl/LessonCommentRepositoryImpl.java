@@ -36,7 +36,9 @@ public class LessonCommentRepositoryImpl implements LessonCommentRepository{
         CriteriaQuery<LessonComment> q = b.createQuery(LessonComment.class);
         Root<LessonComment> root = q.from(LessonComment.class);
         q.select(root);
-        q.where(b.equal(root.get("lessonId"), lessonId));
+        q.where(b.equal(root.get("lessonId").get("id"), lessonId));
+        q.orderBy(b.asc(root.get("createdTime")));
+        
         Query<LessonComment> query = session.createQuery(q);
         return query.getResultList();
     }

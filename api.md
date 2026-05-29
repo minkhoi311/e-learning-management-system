@@ -26,9 +26,6 @@ Tuân thủ cấu trúc đường dẫn quy định, tích hợp trực tiếp v
 | Method | Endpoint | Mô tả | Role (Phân quyền) |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/categories/` | Lấy danh sách tất cả danh mục. | `PUBLIC` |
-| `POST` | `/categories/` | Thêm danh mục khóa học mới. | `ADMIN` |
-| `PATCH` | `/categories/{id}` | Cập nhật thông tin danh mục. | `ADMIN` |
-| `DELETE` | `/categories/{id}` | Xóa danh mục. | `ADMIN` |
 
 ## 4. Phân hệ Khóa học (Course)
 

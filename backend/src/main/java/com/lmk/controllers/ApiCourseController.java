@@ -7,6 +7,7 @@ package com.lmk.controllers;
 import com.lmk.pojo.Course;
 import com.lmk.services.CourseService;
 import com.lmk.utils.DaoUtils;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class ApiCourseController {
     @Autowired
     private Environment env;
 
-    
+    //PUBLIC/api/courses?kw=&cateId=&fromPrice=&toPrice=&sort=&page=
     @GetMapping("/courses")
     public ResponseEntity<Map<String, Object>> list(@RequestParam Map<String, String> params) {
         List<Course> courses = this.courseService.getCourses(params);
@@ -67,8 +68,52 @@ public class ApiCourseController {
 
     @GetMapping("/courses/compare")
     public ResponseEntity<List<Course>> compare(@RequestParam String ids) {
+        if (ids == null || ids.isBlank())
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         List<Course> result = this.courseService.getCoursesByIds(ids);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
     
+    //Instructor
+    // @PreAuthorize("hasRole('INSTRUCTOR')")
+    @PostMapping("/courses")
+    public ResponseEntity<Object> create(@ModelAttribute Course c, Principal principal) {
+        // TODO: gán instructorId từ principal khi có Security
+        // User u = userService.getUserByUsername(principal.getName());
+        // c.setInstructorId(u);
+
+        Map<String, String> errors = this.courseService.validate(c);
+        if (!errors.isEmpty())
+            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+
+        this.courseService.addOrUpdateCourse(c);
+        return new ResponseEntity<>(c, HttpStatus.CREATED);
+    }
+    
+    // PATCH /api/courses/{id} — Instructor sửa khóa học của mình
+    // @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @PatchMapping("/courses/{courseId}")
+    public ResponseEntity<Object> update(@PathVariable int courseId, @ModelAttribute Course c) {
+        // TODO: kiểm tra quyền sở hữu khi có Security
+        // if (!c.getInstructorId().getUsername().equals(principal.getName())) return 403
+
+        c.setId(courseId);
+        Map<String, String> errors = this.courseService.validate(c);
+        if (!errors.isEmpty())
+            return ResponseEntity.badRequest().body(errors);
+
+        this.courseService.addOrUpdateCourse(c);
+        return new ResponseEntity<>(c, HttpStatus.OK);
+    }
+    
+    // DELETE /api/courses/{id} — Instructor xóa khóa học của mình
+    // @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @DeleteMapping("/courses/{courseId}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable int courseId) {
+        // TODO: kiểm tra quyền sở hữu khi có Security
+        boolean ok = this.courseService.deleteCourse(courseId);
+        if (!ok)
+            return new ResponseEntity<>(Map.of("message", "Không tìm thấy khóa học!"), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(Map.of("message", "Xóa khóa học thành công!"), HttpStatus.NO_CONTENT);
+    }
 }

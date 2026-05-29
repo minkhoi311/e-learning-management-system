@@ -28,7 +28,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     @Override
     public List<Category> getCates() {
         Session session = this.factory.getObject().getCurrentSession();
-        Query query = session.createQuery("FROM Category", Category.class);
+        Query query = session.createQuery("FROM Category ORDER BY name ASC", Category.class);
         return query.getResultList();
+    }
+    
+    @Override
+    public Category getCateById(int id) {
+        return this.factory.getObject().getCurrentSession().get(Category.class, id);
     }
 }

@@ -13,24 +13,14 @@ import java.util.Map;
  * @author Acer
  */
 public interface UserRepository {
-
-    public List<User> getUsers(Map<String, String> params);
-
-    public Long countUsers(Map<String, String> params);
-
-    public User getUserById(int id);
-    
-    public List<User> getUsersByRole(String role);
-
-    public User addUser(User user);
-    
-    public User updateUser(User user);
-
-    public boolean activeUser(int id);
-    
-    public boolean unActiveUser(int id);
-
-    public boolean approveInstructor(int id);
-    
-    public User getUserByUsername(String username);
+    List<User> getUsers(Map<String, String> params);
+    Long countUsers(Map<String, String> params);
+    User getUserById(int id);
+    User getUserByUsername(String username);
+    List<User> getUsersByRole(String role);
+    User addUser(User user);
+    User updateUser(User user);
+    boolean activeUser(int id);
+    boolean unActiveUser(int id);
+    boolean approveInstructor(int id);
 }

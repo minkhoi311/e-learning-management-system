@@ -11,12 +11,14 @@ import com.lmk.repositories.CourseRepository;
 import com.lmk.services.CourseService;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -129,6 +131,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<Course> getCoursesByIds(String ids) {
-        return this.getCoursesByIds(ids);
+        List<Integer> idList = Arrays.stream(ids.split(","))
+            .map(String::trim)
+            .map(Integer::parseInt)
+            .collect(Collectors.toList());
+        return this.courseRepo.getCoursesByIds(idList);
     }
 }

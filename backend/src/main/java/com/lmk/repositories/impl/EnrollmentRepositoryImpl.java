@@ -36,7 +36,8 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository{
         
         Root<Enrollment> root = q.from(Enrollment.class);
         q.select(root);
-        q.where(b.equal(root.get("studentId"), studentId));
+        q.where(b.equal(root.get("studentId").get("id"), studentId));
+        q.orderBy(b.desc(root.get("enrolledTime")));
         
         Query<Enrollment> query = session.createQuery(q);
         return query.getResultList();
@@ -56,9 +57,12 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository{
         
         Root<Enrollment> root = q.from(Enrollment.class);
         q.select(root);
-        q.where(b.and(b.equal(root.get("studentId"), studentId), b.equal(root.get("courseId"), courseId)));
+        q.where(
+            b.equal(root.get("studentId").get("id"), studentId),
+            b.equal(root.get("courseId").get("id"), courseId)
+        );
         Query<Enrollment> query = session.createQuery(q);
-         return query.getSingleResult();
+         return query.uniqueResult(); //có thể null
     }
 
     @Override

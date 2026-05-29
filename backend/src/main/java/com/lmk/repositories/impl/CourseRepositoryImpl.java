@@ -132,6 +132,7 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         return query.getResultList();
     }
+    
 
     @Override
     public void addOrUpdateCourse(Course c) {
@@ -160,4 +161,5 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         return DaoUtils.count(session, Course.class, (b, root) -> buildPredicates(b, root, params));
     }
+    
 }

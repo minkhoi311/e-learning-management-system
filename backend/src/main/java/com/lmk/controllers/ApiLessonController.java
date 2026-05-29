@@ -4,6 +4,7 @@
  */
 package com.lmk.controllers;
 
+import com.lmk.pojo.Course;
 import com.lmk.pojo.Lesson;
 import com.lmk.pojo.LessonComment;
 import com.lmk.services.CourseService;
@@ -50,8 +51,10 @@ public class ApiLessonController {
 
     @Autowired
     private Environment env;
-
+    
+    //public
     // GET /api/courses/{courseId}/lessons  — STUDENT (đã enroll), INSTRUCTOR, ADMIN
+// @PreAuthorize("hasRole('STUDENT') or hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @GetMapping("/courses/{courseId}/lessons")
     public ResponseEntity<List<Lesson>> listByCourse(
             @PathVariable int courseId,
@@ -66,6 +69,7 @@ public class ApiLessonController {
         return new ResponseEntity<>(this.commentService.getByLesson(lessonId), HttpStatus.OK);
     }
     
+    // @PreAuthorize("isAuthenticated()")
     @PostMapping("/lessons/{lessonId}/comments")
     public ResponseEntity<Object> addComment(
             @PathVariable int lessonId,
@@ -85,7 +89,7 @@ public class ApiLessonController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
     
-    
+ // @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Map<String, String>> deleteComment(
             @PathVariable int commentId,
@@ -98,5 +102,38 @@ public class ApiLessonController {
             return new ResponseEntity<>(Map.of("message", "Không tìm thấy hoặc bạn không có quyền xóa!"), HttpStatus.FORBIDDEN);
 
         return new ResponseEntity<>(Map.of("message", "Xóa bình luận thành công!"), HttpStatus.NO_CONTENT);
+    }
+    
+    
+    // @PreAuthorize("hasRole('INSTRUCTOR')")
+    public ResponseEntity<Object> createLesson(@PathVariable int courseId,
+                                               @ModelAttribute Lesson l) {
+        // TODO: kiểm tra instructor có sở hữu course không khi có Security
+        Course c = new Course();
+        c.setId(courseId);
+        l.setCourseId(c);
+
+        this.lessonService.addOrUpdateLesson(l);
+        return new ResponseEntity<>(l, HttpStatus.CREATED);
+    }
+    
+    // PUT /api/lessons/{id} — Instructor sửa bài học
+    // @PreAuthorize("hasRole('INSTRUCTOR')")
+    @PutMapping("/lessons/{lessonId}")
+    public ResponseEntity<Lesson> updateLesson(@PathVariable int lessonId,
+                                               @ModelAttribute Lesson l) {
+        // TODO: kiểm tra quyền sở hữu khi có Security
+        l.setId(lessonId);
+        this.lessonService.addOrUpdateLesson(l);
+        return new ResponseEntity<>(l, HttpStatus.OK);
+    }
+
+    // DELETE /api/lessons/{id} — Instructor xóa bài học
+    // @PreAuthorize("hasRole('INSTRUCTOR')")
+    @DeleteMapping("/lessons/{lessonId}")
+    public ResponseEntity<Map<String, String>> deleteLesson(@PathVariable int lessonId) {
+        // TODO: kiểm tra quyền sở hữu khi có Security
+        this.lessonService.deleteLesson(lessonId);
+        return new ResponseEntity<>(Map.of("message", "Xóa bài học thành công!"), HttpStatus.NO_CONTENT);
     }
 }

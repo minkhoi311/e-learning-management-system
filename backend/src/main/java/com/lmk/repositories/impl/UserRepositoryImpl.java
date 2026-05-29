@@ -61,7 +61,12 @@ public class UserRepositoryImpl implements UserRepository {
         if (role != null && !role.isEmpty()) {
             predicates.add(b.equal(root.get("role"), role));
         }
-
+        
+        String isInstructor = params.get("isInstructor");
+        if (isInstructor != null && !isInstructor.isEmpty()) {
+            predicates.add(b.equal(root.get("isInstructor"), Boolean.parseBoolean(isInstructor)));
+        }
+        
         return predicates;
     }
 

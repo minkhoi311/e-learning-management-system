@@ -13,28 +13,16 @@ import java.util.Map;
  * @author Acer
  */
 public interface UserService {
-
-    public List<User> getUsers(Map<String, String> params);
-
-    public Long countUsers(Map<String, String> params);
-
-    public User getUserById(int id);
-    
-    public User getUserByUsername(String username);
-
-    public List<User> getUsersByRole(String role);
-
-    public User addUser(User user);
-
-    public User updateUser(User user);
-    
-    public User updateCurrentUser(User u, String username);
-    
-    public boolean changePassword(String username, String oldPassword, String newPassword);
-    
-    public boolean unActiveUser(int id);
-    
-    public boolean activeUser(int id);
-
-    public boolean approveInstructor(int id);
+    List<User> getUsers(Map<String, String> params);
+    Long countUsers(Map<String, String> params);
+    User getUserById(int id);
+    User getUserByUsername(String username);
+    List<User> getUsersByRole(String role);
+    User addUser(User user);
+    User updateUser(User user);
+    User updateCurrentUser(User u, String username);
+    boolean changePassword(String username, String oldPassword, String newPassword);
+    boolean unActiveUser(int id);
+    boolean activeUser(int id);
+    boolean approveInstructor(int id);
 }

@@ -21,10 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Acer
  */
-
 @Repository
 @Transactional
-public class EnrollmentRepositoryImpl implements EnrollmentRepository{
+public class EnrollmentRepositoryImpl implements EnrollmentRepository {
+
     @Autowired
     private LocalSessionFactoryBean factory;
 
@@ -33,12 +33,12 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository{
         Session session = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
-        
+
         Root<Enrollment> root = q.from(Enrollment.class);
         q.select(root);
         q.where(b.equal(root.get("studentId").get("id"), studentId));
         q.orderBy(b.desc(root.get("enrolledTime")));
-        
+
         Query<Enrollment> query = session.createQuery(q);
         return query.getResultList();
     }
@@ -54,15 +54,15 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository{
         Session session = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
-        
+
         Root<Enrollment> root = q.from(Enrollment.class);
         q.select(root);
         q.where(
-            b.equal(root.get("studentId").get("id"), studentId),
-            b.equal(root.get("courseId").get("id"), courseId)
+                b.equal(root.get("studentId").get("id"), studentId),
+                b.equal(root.get("courseId").get("id"), courseId)
         );
         Query<Enrollment> query = session.createQuery(q);
-         return query.uniqueResult(); //có thể null
+        return query.uniqueResult();
     }
 
     @Override
@@ -77,7 +77,23 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository{
         Session session = this.factory.getObject().getCurrentSession();
         return (Enrollment) session.merge(e);
     }
-    
-    
 
+    @Override
+    public List<Enrollment> findByCourseId(int courseId) {
+        Session session = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
+
+        Root<Enrollment> root = q.from(Enrollment.class);
+        q.select(root);
+
+        // Lọc theo course_id
+        q.where(b.equal(root.get("courseId").get("id"), courseId));
+
+        // Sắp xếp theo thời gian đăng ký mới nhất
+        q.orderBy(b.desc(root.get("enrolledTime")));
+
+        Query<Enrollment> query = session.createQuery(q);
+        return query.getResultList();
+    }
 }

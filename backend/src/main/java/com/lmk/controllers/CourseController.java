@@ -111,18 +111,4 @@ public class CourseController {
         return "redirect:/admin/courses";
     }
     
-    // 6. XÓA KHÓA HỌC
-    @GetMapping("/courses/delete/{courseId}")
-    public String delete(@PathVariable int courseId,
-                         RedirectAttributes redirectAttrs) {
-        boolean ok = this.courseService.deleteCourse(courseId);
-        if (ok) {
-            redirectAttrs.addFlashAttribute("successMsg", "Xóa khóa học thành công!");
-        } else {
-            redirectAttrs.addFlashAttribute("errMsg", "Không tìm thấy khóa học!");
-        }
-        return "redirect:/admin/courses";
-    }
-    
-    
 }

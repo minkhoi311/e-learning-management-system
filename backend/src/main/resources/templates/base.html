@@ -1,5 +1,6 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head>
         <title>Quản trị Hệ thống E-Learning</title>
     <th:block th:fragment="css">
@@ -12,7 +13,7 @@
     <header th:fragment="header">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" th:href="@{/admin}">
+                <a class="navbar-brand fw-bold" th:href="@{/}">
                     <i class="bi bi-book-half me-2"></i>E-Learning Admin
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
@@ -21,22 +22,49 @@
                 <div class="collapse navbar-collapse" id="adminNavbar">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" th:href="@{/admin}"><i class="bi bi-house-door me-1"></i>Trang chủ</a>
+                            <a class="nav-link" th:href="@{/}"><i class="bi bi-house-door me-1"></i>Trang chủ</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/admin/courses}"><i class="bi bi-journal-richtext me-1"></i>Khóa học</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/admin/lessons}"><i class="bi bi-file-earmark-play me-1"></i>Bài học</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
-                        </li>
+                        
+                        <th:block sec:authorize="isAuthenticated()">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/admin/categories}"><i class="bi bi-tags me-1"></i>Danh mục</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/admin/courses}"><i class="bi bi-journal-richtext me-1"></i>Khóa học</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/admin/lessons}"><i class="bi bi-file-earmark-play me-1"></i>Bài học</a>
+                            </li>
+
+                            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                                <a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people me-1"></i>Người dùng</a>
+                            </li>
+                        </th:block>
                     </ul>
 
                     <div class="d-flex align-items-center">
-                        <span class="text-light me-3">Xin chào, <strong>Admin</strong></span>
-                        <a th:href="@{/logout}" class="btn btn-outline-danger btn-sm">Đăng xuất</a>
+
+                        <th:block sec:authorize="isAnonymous()">
+                            <a th:href="@{/admin/login}" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                            </a>
+                        </th:block>
+
+                        <th:block sec:authorize="isAuthenticated()">
+                            <span class="text-light me-3">
+                                Xin chào,
+                                <strong sec:authentication="name">Admin</strong>
+                            </span>
+
+                            <form th:action="@{/logout}" method="post" class="d-inline mb-0">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </th:block>
+
                     </div>
                 </div>
             </div>

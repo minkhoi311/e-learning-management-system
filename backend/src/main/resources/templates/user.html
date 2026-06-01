@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Quản lý Người dùng</title>
+    <head>
+        <title>Quản lý Người dùng</title>
     <th:block th:replace="~{base :: css}"></th:block>
 </head>
 <body class="bg-light">
@@ -49,11 +49,11 @@
                     <tr>
                         <th class="text-center" width="5%">ID</th>
                         <th class="text-center" width="10%">Avatar</th>
-                        <th width="30%">Họ và Tên</th>
+                        <th width="25%">Họ và Tên</th>
                         <th width="15%">Tài khoản</th>
-                        <th class="text-center" width="20%">Vai trò</th>
+                        <th class="text-center" width="15%">Vai trò</th>
                         <th class="text-center" width="10%">Trạng thái</th>
-                        <th class="text-center" width="10%">Thao tác</th>
+                        <th class="text-center" width="20%">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,24 +75,31 @@
                         <td class="text-center">
                             <span class="badge bg-danger" th:if="${u.role == 'ADMIN'}">Admin</span>
                             <span class="badge bg-info text-dark" th:if="${u.role == 'STUDENT'}">Sinh viên</span>
-                            
-                            <th:block th:if="${u.role == 'INSTRUCTOR'}">
-                                <span class="badge bg-success" th:if="${u.isInstructor}"><i class="bi bi-check-circle"></i> GV (Đã duyệt)</span>
-                                <span class="badge bg-warning text-dark" th:unless="${u.isInstructor}"><i class="bi bi-hourglass-split"></i> GV (Chờ duyệt)</span>
-                            </th:block>
-                        </td>
 
-                        <td class="text-center">
-                            <span class="badge bg-success" th:if="${u.isActive}">Active</span>
-                            <span class="badge bg-secondary" th:unless="${u.isActive}">Locked</span>
-                        </td>
+                <th:block th:if="${u.role == 'INSTRUCTOR'}">
+                    <span class="badge bg-success" th:if="${u.isInstructor}"><i class="bi bi-check-circle"></i> GV (Đã duyệt)</span>
+                    <span class="badge bg-warning text-dark" th:unless="${u.isInstructor}"><i class="bi bi-hourglass-split"></i> Chờ duyệt</span>
+                </th:block>
+                </td>
 
-                        <td class="text-center">
-                            <a th:href="@{/admin/users/{id}(id=${u.id})}" class="btn btn-sm btn-outline-info" title="Xem chi tiết & Cập nhật">
-                                <i class="bi bi-pencil-square"></i> Sửa
-                            </a>
-                        </td>
-                    </tr>
+                <td class="text-center">
+                    <span class="badge bg-success" th:if="${u.isActive}">Active</span>
+                    <span class="badge bg-secondary" th:unless="${u.isActive}">Locked</span>
+                </td>
+
+                <td class="text-center">
+                <th:block th:if="${u.role == 'INSTRUCTOR' and !u.isInstructor}">
+                    <button class="btn btn-sm btn-success me-1" title="Duyệt giảng viên"
+                            th:onclick="'approveInstructor(\'' + @{/api/users/approve} + '\', ' + ${u.id} + ', this)'">
+                        <i class="bi bi-check-circle"></i> Duyệt
+                    </button>
+                </th:block>
+
+                <a th:href="@{/admin/users/{id}(id=${u.id})}" class="btn btn-sm btn-outline-info" title="Xem chi tiết & Cập nhật">
+                    <i class="bi bi-pencil-square"></i> Sửa
+                </a>
+                </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -102,11 +109,9 @@
                 <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
                     <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1}, kw=${param.kw}, role=${param.role})}">« Trước</a>
                 </li>
-
                 <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage} ? 'active'">
                     <a class="page-link" th:href="@{/admin/users(page=${i}, kw=${param.kw}, role=${param.role})}" th:text="${i}"></a>
                 </li>
-
                 <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
                     <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1}, kw=${param.kw}, role=${param.role})}">Sau »</a>
                 </li>
@@ -115,5 +120,7 @@
     </section>
 
     <div th:replace="~{base :: footer}"></div>
+
+    <script th:src="@{/js/script.js}"></script>
 </body>
 </html>

@@ -35,29 +35,40 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Acer
  */
-
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
 public class ApiLessonController {
+
     @Autowired
     private LessonService lessonService;
-    
+
     @Autowired
     private CourseService courseService;
-    
+
     @Autowired
     private LessonCommentService commentService;
 
     @Autowired
     private Environment env;
-    
+
+    @GetMapping("/lessons/{lessonId}")
+    public ResponseEntity<Lesson> getLessonDetail(@PathVariable("lessonId") int lessonId) {
+        Lesson l = this.lessonService.getLessonById(lessonId);
+
+        if (l == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(l, HttpStatus.OK);
+    }
+
     //public
     // GET /api/courses/{courseId}/lessons  — STUDENT (đã enroll), INSTRUCTOR, ADMIN
 // @PreAuthorize("hasRole('STUDENT') or hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @GetMapping("/courses/{courseId}/lessons")
     public ResponseEntity<List<Lesson>> listByCourse(
-            @PathVariable int courseId,
+            @PathVariable("courseId") int courseId,
             @RequestParam Map<String, String> params) {
         params.put("courseId", String.valueOf(courseId));
         params.put("isActive", "true");
@@ -65,49 +76,52 @@ public class ApiLessonController {
     }
 
     @GetMapping("/lessons/{lessonId}/comments")
-    public ResponseEntity<List<LessonComment>> listComments(@PathVariable int lessonId) {
+    public ResponseEntity<List<LessonComment>> listComments(@PathVariable("lessonId") int lessonId) {
         return new ResponseEntity<>(this.commentService.getByLesson(lessonId), HttpStatus.OK);
     }
-    
+
     // @PreAuthorize("isAuthenticated()")
-    @PostMapping("/lessons/{lessonId}/comments")
+    @PostMapping("/secure/lessons/{lessonId}/comments")
     public ResponseEntity<Object> addComment(
-            @PathVariable int lessonId,
+            @PathVariable("lessonId") int lessonId,
             @RequestBody Map<String, Object> body,
             Principal principal) {
-        if (principal == null)
+        if (principal == null) {
             return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"), HttpStatus.UNAUTHORIZED);
+        }
 
         String content = (String) body.get("content");
         Integer parentId = body.get("parent_comment_id") != null
                 ? Integer.parseInt(body.get("parent_comment_id").toString()) : null;
 
         LessonComment saved = this.commentService.add(lessonId, content, parentId, principal.getName());
-        if (saved == null)
+        if (saved == null) {
             return new ResponseEntity<>(Map.of("message", "Nội dung không được để trống!"), HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
-    
- // @PreAuthorize("isAuthenticated()")
-    @DeleteMapping("/comments/{commentId}")
+
+    // @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/secure/comments/{commentId}")
     public ResponseEntity<Map<String, String>> deleteComment(
-            @PathVariable int commentId,
+            @PathVariable("commentId") int commentId,
             Principal principal) {
-        if (principal == null)
+        if (principal == null) {
             return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"), HttpStatus.UNAUTHORIZED);
+        }
 
         boolean ok = this.commentService.delete(commentId, principal.getName());
-        if (!ok)
+        if (!ok) {
             return new ResponseEntity<>(Map.of("message", "Không tìm thấy hoặc bạn không có quyền xóa!"), HttpStatus.FORBIDDEN);
+        }
 
         return new ResponseEntity<>(Map.of("message", "Xóa bình luận thành công!"), HttpStatus.NO_CONTENT);
     }
-    
-    
-    // @PreAuthorize("hasRole('INSTRUCTOR')")
-    public ResponseEntity<Object> createLesson(@PathVariable int courseId,
-                                               @ModelAttribute Lesson l) {
+
+    @PostMapping("/courses/{courseId}/lessons")
+    public ResponseEntity<Object> createLesson(@PathVariable("courseId") int courseId,
+            @ModelAttribute Lesson l) {
         // TODO: kiểm tra instructor có sở hữu course không khi có Security
         Course c = new Course();
         c.setId(courseId);
@@ -116,12 +130,12 @@ public class ApiLessonController {
         this.lessonService.addOrUpdateLesson(l);
         return new ResponseEntity<>(l, HttpStatus.CREATED);
     }
-    
+
     // PUT /api/lessons/{id} — Instructor sửa bài học
     // @PreAuthorize("hasRole('INSTRUCTOR')")
     @PutMapping("/lessons/{lessonId}")
-    public ResponseEntity<Lesson> updateLesson(@PathVariable int lessonId,
-                                               @ModelAttribute Lesson l) {
+    public ResponseEntity<Lesson> updateLesson(@PathVariable("lessonId") int lessonId,
+            @ModelAttribute Lesson l) {
         // TODO: kiểm tra quyền sở hữu khi có Security
         l.setId(lessonId);
         this.lessonService.addOrUpdateLesson(l);
@@ -131,7 +145,7 @@ public class ApiLessonController {
     // DELETE /api/lessons/{id} — Instructor xóa bài học
     // @PreAuthorize("hasRole('INSTRUCTOR')")
     @DeleteMapping("/lessons/{lessonId}")
-    public ResponseEntity<Map<String, String>> deleteLesson(@PathVariable int lessonId) {
+    public ResponseEntity<Map<String, String>> deleteLesson(@PathVariable("lessonId") int lessonId) {
         // TODO: kiểm tra quyền sở hữu khi có Security
         this.lessonService.deleteLesson(lessonId);
         return new ResponseEntity<>(Map.of("message", "Xóa bài học thành công!"), HttpStatus.NO_CONTENT);

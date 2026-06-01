@@ -1,0 +1,57 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thống kê Tổng quan</title>
+    <th:block th:replace="~{base :: css}"></th:block>
+</head>
+<body class="bg-light">
+    <div th:replace="~{base :: header}"></div>
+
+    <section class="container mt-4 mb-5">
+        <h2 class="text-primary mb-4"><i class="bi bi-bar-chart-fill"></i> TỔNG QUAN HỆ THỐNG</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng Khóa Học</h5>
+                        <h2 class="display-5" th:text="${stats.totalCourses}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng Lượt Đăng Ký</h5>
+                        <h2 class="display-5" th:text="${stats.totalEnrollments}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng Doanh Thu</h5>
+                        <h2 class="display-5" th:text="${stats.totalRevenue != null ? #numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white fw-bold">Người Dùng Theo Vai Trò</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center" th:each="u : ${stats.usersByRole}">
+                            <span th:text="${u.role}">Vai trò</span>
+                            <span class="badge bg-primary rounded-pill" th:text="${u.count}">0</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div th:replace="~{base :: footer}"></div>
+</body>
+</html>

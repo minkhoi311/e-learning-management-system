@@ -21,7 +21,7 @@ public class ApiStatsController {
 
     // GET /api/stats/overview — Instructor xem thống kê của mình
     // @PreAuthorize("hasRole('INSTRUCTOR')")
-    @GetMapping("/stats/overview")
+    @GetMapping("/secure/stats/overview")
     public ResponseEntity<Object> instructorStats(Principal principal) {
 
         if (principal == null)
@@ -32,7 +32,7 @@ public class ApiStatsController {
 
     // GET /api/stats/admin/overview — Admin xem báo cáo tổng thể
     // @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/stats/admin/overview")
+    @GetMapping("/secure/stats/admin/overview")
     public ResponseEntity<Map<String, Object>> adminStats() {
         return new ResponseEntity<>(this.statsService.getAdminStats(),HttpStatus.OK);
     }

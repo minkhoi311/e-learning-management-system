@@ -72,13 +72,4 @@ public class LessonController {
 
         return "lesson-detail";
     }
-
-    @GetMapping("/lessons/delete/{lessonId}")
-    public String deleteLesson(@PathVariable(value = "lessonId") int id) {
-        // Gọi Service để xóa bài học theo ID
-        this.lessonService.deleteLesson(id);
-
-        // Xóa xong thì load lại trang danh sách bài học
-        return "redirect:/admin/lessons";
-    }
 }

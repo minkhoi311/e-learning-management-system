@@ -4,6 +4,7 @@
  */
 package com.lmk.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -50,6 +51,7 @@ public class Enrollment implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date enrolledTime;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "enrollmentId")
+    @JsonIgnore
     private Set<LessonProgress> lessonProgressSet;
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "enrollmentId")
     private Payment payment;

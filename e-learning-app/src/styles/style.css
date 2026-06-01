@@ -1,0 +1,54 @@
+:root {
+    /* Khai báo biến màu toàn cục để dễ dàng thay đổi sau này */
+    --primary-dark-blue: #004085; /* Xanh dương đậm, dịu mắt và chuyên nghiệp hơn */
+    --secondary-forest-green: #145c32; /* Xanh lá đậm cho Footer */
+}
+
+/* =========================================
+   Layout & Backgrounds
+========================================= */
+.bg-dark-blue {
+    background-color: var(--primary-dark-blue) !important;
+}
+
+.bg-forest-green {
+    background-color: var(--secondary-forest-green) !important;
+    color: #e0e0e0;
+}
+
+/* =========================================
+   Hover Effects
+========================================= */
+.hover-opacity {
+    transition: opacity 0.3s ease;
+}
+.hover-opacity:hover {
+    opacity: 0.7;
+}
+
+/* Hiệu ứng nổi lên khi hover chuột vào Card khóa học */
+.hover-lift {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+}
+
+/* =========================================
+   Text & Image Utilities
+========================================= */
+/* Cắt chữ ở dòng thứ 3 và thêm dấu '...' */
+.text-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Cố định kích thước ảnh bìa khóa học tránh vỡ layout */
+.card-img-custom {
+    height: 180px;
+    object-fit: cover;
+    width: 100%;
+}

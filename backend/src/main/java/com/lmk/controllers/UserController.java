@@ -81,26 +81,8 @@ public class UserController {
         return "redirect:/admin/users";
     }
 
-
-    @GetMapping("/users/approvals")
-    public String pendingApprovals(Model model) {
-        Map<String, String> params = new HashMap<>();
-        params.put("role", "INSTRUCTOR");
-        params.put("isInstructor", "false");
-        List<User> pendingUsers = userService.getUsers(params);
-        model.addAttribute("pendingUsers", pendingUsers);
-        return "approve";
-    }
-    
-    @GetMapping("/users/approve/{id}")
-    public String approveInstructor(@PathVariable int id,
-                                    RedirectAttributes redirectAttrs) {
-        boolean ok = this.userService.approveInstructor(id);
-        if (ok) {
-            redirectAttrs.addFlashAttribute("successMsg", "Đã duyệt tài khoản giảng viên thành công!");
-        } else {
-            redirectAttrs.addFlashAttribute("errMsg", "Duyệt thất bại! Không tìm thấy hoặc không phải giảng viên.");
+    @GetMapping("/login")
+        public String loginView() {
+            return "login";
         }
-        return "redirect:/admin/users/approvals";
-    }
 }

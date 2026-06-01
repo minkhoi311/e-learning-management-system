@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private List<Predicate> buildPredicates(CriteriaBuilder b, Root<User> root, Map<String, String> params) {
         List<Predicate> predicates = new ArrayList<>();
         if (params == null) {
@@ -53,7 +57,6 @@ public class UserRepositoryImpl implements UserRepository {
             Predicate matchLastName = b.like(b.lower(root.get("lastName")), searchPattern);
             Predicate matchFullName = b.like(b.lower(root.get("fullName")), searchPattern);
 
-
             predicates.add(b.or(matchUsername, matchEmail, matchFirstName, matchLastName, matchFullName));
         }
 
@@ -61,12 +64,12 @@ public class UserRepositoryImpl implements UserRepository {
         if (role != null && !role.isEmpty()) {
             predicates.add(b.equal(root.get("role"), role));
         }
-        
+
         String isInstructor = params.get("isInstructor");
         if (isInstructor != null && !isInstructor.isEmpty()) {
             predicates.add(b.equal(root.get("isInstructor"), Boolean.parseBoolean(isInstructor)));
         }
-        
+
         return predicates;
     }
 
@@ -77,7 +80,6 @@ public class UserRepositoryImpl implements UserRepository {
         CriteriaQuery<User> q = b.createQuery(User.class);
         Root<User> root = q.from(User.class);
         q.select(root);
-
 
         List<Predicate> predicates = buildPredicates(b, root, params);
         if (!predicates.isEmpty()) {
@@ -123,11 +125,6 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User addUser(User user) {
         Session session = this.factory.getObject().getCurrentSession();
-        
-        user.setIsInstructor(false);
-        user.setIsAdmin(false);
-        user.setAuthProvider("LOCAL");
-        user.setCreatedTime(new Date());
         session.persist(user);
         return user;
     }
@@ -135,56 +132,16 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User updateUser(User user) {
         Session session = this.factory.getObject().getCurrentSession();
-        user.setUpdatedTime(new Date());
         return (User) session.merge(user);
-    }
-
-    @Override
-    public boolean unActiveUser(int id) {
-        Session session = this.factory.getObject().getCurrentSession();
-        User user = session.get(User.class, id);
-
-        if (user != null) {
-            user.setIsActive(false);
-            session.merge(user);
-            return true;
-        }
-
-        return false;
-    }
-    
-    @Override
-    public boolean activeUser(int id) {
-        Session session = this.factory.getObject().getCurrentSession();
-        User user = session.get(User.class, id);
-
-        if (user != null) {
-            user.setIsActive(true);
-            session.merge(user);
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean approveInstructor(int id) {
-        Session session = this.factory.getObject().getCurrentSession();
-        User user = session.get(User.class, id);
-
-        if (user != null && "INSTRUCTOR".equals(user.getRole())) {
-            user.setIsInstructor(true);
-            session.merge(user);
-            return true;
-        }
-        return false;
     }
 
     @Override
     public User getUserByUsername(String username) {
         Session session = this.factory.getObject().getCurrentSession();
-        Query<User> q = session.createQuery("FROM User WHERE username = :username", User.class);
+        Query q = session.createNamedQuery("User.findByUsername", User.class);
         q.setParameter("username", username);
-        return q.uniqueResult();
+
+        return (User) q.getSingleResult();
+
     }
 }

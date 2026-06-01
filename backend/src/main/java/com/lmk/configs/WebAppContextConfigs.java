@@ -53,21 +53,10 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
         return new StandardServletMultipartResolver();
     }
     
-    
-    //Khôi cloudinary
-    @Bean
-    public Cloudinary cloudinary() {
-        Cloudinary cloudinary
-                = new Cloudinary(ObjectUtils.asMap(
-                        "cloud_name", "dhin65fs8",
-                        "api_key", "198184884121951",
-                        "api_secret", "NWBqTXUf6LwdDRKLEW9Y1wqxbYA",
-                        "secure", true));
-        return cloudinary;
-    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/");
-    }
+        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/scripts/");
+    }   
+    
 }

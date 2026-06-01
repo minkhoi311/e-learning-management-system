@@ -4,6 +4,7 @@
  */
 package com.lmk.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -66,6 +67,7 @@ public class Payment implements Serializable {
     private Date paidTime;
     @JoinColumn(name = "enrollment_id", referencedColumnName = "id")
     @OneToOne(optional = false)
+    @JsonIgnore
     private Enrollment enrollmentId;
 
     public Payment() {

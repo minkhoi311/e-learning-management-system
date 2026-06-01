@@ -20,7 +20,4 @@ public interface UserRepository {
     List<User> getUsersByRole(String role);
     User addUser(User user);
     User updateUser(User user);
-    boolean activeUser(int id);
-    boolean unActiveUser(int id);
-    boolean approveInstructor(int id);
 }

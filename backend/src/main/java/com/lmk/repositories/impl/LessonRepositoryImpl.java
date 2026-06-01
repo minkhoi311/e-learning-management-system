@@ -42,12 +42,10 @@ public class LessonRepositoryImpl implements LessonRepository {
             predicates.add(b.like(b.lower(root.get("subject")), "%" + kw.toLowerCase().trim() + "%"));
         }
 
-
         String courseId = params.get("courseId");
         if (courseId != null && !courseId.isEmpty()) {
             predicates.add(b.equal(root.get("courseId").as(Integer.class), Integer.parseInt(courseId)));
         }
-
 
         String active = params.get("isActive");
         if (active != null && !active.isEmpty()) {
@@ -89,7 +87,7 @@ public class LessonRepositoryImpl implements LessonRepository {
         Query<Lesson> query = session.createQuery(q);
 
         // Áp dụng phân trang
-        if (params != null && params.containsKey("page")) { 
+        if (params != null && params.containsKey("page")) {
             int pageSize = this.env.getProperty("lessons.page_size", Integer.class);
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * pageSize;
@@ -125,7 +123,6 @@ public class LessonRepositoryImpl implements LessonRepository {
             session.remove(lesson);
         }
     }
-    
 
     @Override
     public Long countLesson(Map<String, String> params) {
@@ -133,5 +130,17 @@ public class LessonRepositoryImpl implements LessonRepository {
 
         return DaoUtils.count(session, Lesson.class, (b, root) -> buildPredicates(b, root, params));
     }
-    
+
+    @Override
+    public Long countLessonByCourseId(int courseId) {
+        Session session = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Lesson> root = q.from(Lesson.class);
+        q.select(b.count(root));
+        q.where(b.equal(root.get("courseId").get("id"), courseId));
+
+        return session.createQuery(q).getSingleResult();
+    }
+
 }

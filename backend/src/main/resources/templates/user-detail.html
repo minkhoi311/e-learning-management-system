@@ -28,9 +28,7 @@
                         
                         <div class="col-md-6 mb-3">
                             <label for="username" class="form-label fw-bold">Tên đăng nhập (Username): <span class="text-danger">*</span></label>
-                            
                             <input th:if="${user.id == null}" type="text" class="form-control" id="username" placeholder="Nhập username" th:field="*{username}" required />
-                            
                             <input th:unless="${user.id == null}" type="text" class="form-control bg-secondary text-white bg-opacity-25" id="username" th:field="*{username}" readonly title="Không được phép sửa tên đăng nhập" />
                         </div>
 
@@ -40,7 +38,7 @@
                         </div>
                     </div>
 
-                    <h6 class="text-muted mb-3"><i class="bi bi-person-lines-fill"></i> Thông tin cá nhân & Phân quyền</h6>
+                    <h6 class="text-muted mb-3"><i class="bi bi-person-lines-fill"></i> Thông tin cá nhân & Vai trò</h6>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="lastName" class="form-label fw-bold">Họ và đệm: <span class="text-danger">*</span></label>
@@ -54,6 +52,11 @@
                     </div>
 
                     <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="email" class="form-label fw-bold">Email: <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" placeholder="Nhập địa chỉ Email" th:field="*{email}" required />
+                        </div>
+
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label fw-bold">Số điện thoại: </label>
                             <input type="tel" class="form-control" id="phone" placeholder="Nhập số điện thoại" th:field="*{phone}" />
@@ -69,37 +72,17 @@
                         </div>
                     </div>
 
-                    <div class="row bg-white border rounded p-3 mb-3 mx-0 shadow-sm border-start border-4 border-primary">
-                        <h6 class="text-primary mb-3"><i class="bi bi-sliders"></i> Quản lý Trạng thái & Cấp quyền</h6>
+                    <div class="bg-white border rounded p-3 mb-3 mx-0 shadow-sm border-start border-4 border-primary">
+                        <h6 class="text-primary mb-3"><i class="bi bi-sliders"></i> Trạng thái tài khoản</h6>
                         
-                        <div class="col-md-4 d-flex flex-column justify-content-center">
-                            <div class="form-check form-switch fs-5">
+                        <div class="d-flex align-items-center">
+                            <div class="form-check form-switch fs-5 mb-0">
                                 <input class="form-check-input" type="checkbox" id="isActive" th:field="*{isActive}">
-                                <label class="form-check-label fs-6 fw-bold" th:classappend="${user.id != null and !user.isActive} ? 'text-danger' : 'text-success'" for="isActive">
+                                <label class="form-check-label fs-6 fw-bold ms-2" th:classappend="${user.id != null and !user.isActive} ? 'text-danger' : 'text-success'" for="isActive">
                                     Đang hoạt động
                                 </label>
                             </div>
-                            <small class="text-muted fst-italic">Tắt để khóa / Bật để mở khóa</small>
-                        </div>
-
-                        <div class="col-md-4 d-flex flex-column justify-content-center border-start px-4">
-                            <div class="form-check form-switch fs-5">
-                                <input class="form-check-input" type="checkbox" id="isInstructor" th:field="*{isInstructor}">
-                                <label class="form-check-label fs-6 text-warning text-dark fw-bold" for="isInstructor">
-                                    Duyệt Giảng viên
-                                </label>
-                            </div>
-                            <small class="text-muted fst-italic">Cấp quyền tạo khóa học</small>
-                        </div>
-
-                        <div class="col-md-4 d-flex flex-column justify-content-center border-start px-4">
-                            <div class="form-check form-switch fs-5">
-                                <input class="form-check-input" type="checkbox" id="isAdmin" th:field="*{isAdmin}">
-                                <label class="form-check-label fs-6 text-primary fw-bold" for="isAdmin">
-                                    Nhân viên
-                                </label>
-                            </div>
-                            <small class="text-muted fst-italic">Quyền truy cập nội bộ</small>
+                            <small class="text-muted fst-italic ms-3">(Tắt công tắc để khóa tài khoản này)</small>
                         </div>
                     </div>
 
@@ -123,31 +106,15 @@
 
                     <input type="hidden" th:field="*{id}" />
                     <input type="hidden" th:field="*{avatar}" />
-                </form>
+                    
+                    <input type="hidden" th:field="*{isInstructor}" />
+                    <input type="hidden" th:field="*{isAdmin}" />
 
+                </form>
             </div>
         </div>
     </section>
 
     <div th:replace="~{base :: footer}"></div>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const roleSelect = document.getElementById("role");
-            const isInstructorToggle = document.getElementById("isInstructor");
-            
-            function handleInstructorToggle() {
-                if (roleSelect.value === 'STUDENT') {
-                    isInstructorToggle.checked = false; // Tắt công tắc
-                    isInstructorToggle.disabled = true; // Khóa mờ công tắc
-                } else {
-                    isInstructorToggle.disabled = false; // Mở lại cho Giảng Viên hoặc Admin
-                }
-            }
-
-            roleSelect.addEventListener("change", handleInstructorToggle);
-            handleInstructorToggle(); // Chạy khi load trang
-        });
-    </script>
 </body>
 </html>

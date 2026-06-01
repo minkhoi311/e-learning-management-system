@@ -17,4 +17,5 @@ public interface EnrollmentRepository {
     Enrollment getByStudentAndCourse(int studentId, int courseId);
     Enrollment enroll(Enrollment e);
     Enrollment update(Enrollment e);
+    List<Enrollment> findByCourseId(int courseId);
 }

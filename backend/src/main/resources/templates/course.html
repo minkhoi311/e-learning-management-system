@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Quản lý Khóa học</title>
+    <head>
+        <title>Quản lý Khóa học</title>
     <th:block th:replace="~{base :: css}"></th:block>
 </head>
 <body class="bg-light">
@@ -57,18 +57,23 @@
                     </tr>
                     <tr th:each="c: ${courses}">
                         <td class="text-center fw-bold text-secondary" th:text="${c.id}"></td>
-                        
+
                         <td class="text-center">
                             <img th:if="${c.image != null and !c.image.isEmpty()}" th:src="${c.image}" style="width: 90px; height: 60px; object-fit: cover;" class="rounded border shadow-sm" alt="Hình ảnh khóa học" />
                             <span th:unless="${c.image != null and !c.image.isEmpty()}" class="badge bg-light text-dark border">No Image</span>
                         </td>
-                        
+
                         <td class="fw-bold text-primary" th:text="${c.subject}"></td>
                         <td class="fw-bold text-success" th:text="${c.price != null ? #numbers.formatDecimal(c.price, 0, 'COMMA', 0, 'POINT') + ' đ' : 'Miễn phí'}"></td>
-                        
+
                         <td class="text-center">
                             <a th:href="@{/admin/courses/} + ${c.id}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-pencil-square"></i> Cập nhật</a>
-                            <button class="btn btn-sm btn-outline-danger" th:onclick="'deleteCourse(\'' + @{/api/courses/} + ${c.id} + '\')'"><i class="bi bi-trash"></i> Xóa</button>
+                            
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    th:onclick="'deleteCourse(\'' + @{/api/courses/} + ${c.id} + '\', this)'">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                            
                         </td>
                     </tr>
                 </tbody>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Đăng nhập Quản trị</title>
+    <th:block th:replace="~{base :: css}"></th:block>
+</head>
+<body class="bg-light">
+    <div th:replace="~{base :: header}"></div>
+
+    <section class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h3 class="text-primary fw-bold"></i> ĐĂNG NHẬP</h3>
+                            <p class="text-muted small">Hệ thống Quản lý E-Learning</p>
+                        </div>
+
+                        <div th:if="${param.error}" class="alert alert-danger text-center small py-2">
+                            <i class="bi bi-exclamation-circle"></i> Sai tên đăng nhập hoặc mật khẩu!
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-success text-center small py-2">
+                            <i class="bi bi-check-circle"></i> Bạn đã đăng xuất thành công.
+                        </div>
+
+                        <form method="post" th:action="@{/login}">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="username" placeholder="Tên đăng nhập" name="username" required autofocus />
+                                <label for="username">Tên đăng nhập</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="password" placeholder="Mật khẩu" name="password" required />
+                                <label for="password">Mật khẩu</label> </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Đăng nhập</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div th:replace="~{base :: footer}"></div>
+</body>
+</html>

@@ -33,70 +33,72 @@ public class LessonRepositoryImpl implements LessonRepository {
 
     private List<Predicate> buildPredicates(CriteriaBuilder b, Root<Lesson> root, Map<String, String> params) {
         List<Predicate> predicates = new ArrayList<>();
-        if (params == null) {
-            return predicates;
-        }
+        if (params == null) return predicates;
 
         String kw = params.get("kw");
-        if (kw != null && !kw.isEmpty()) {
+        if (kw != null && !kw.isEmpty())
             predicates.add(b.like(b.lower(root.get("subject")), "%" + kw.toLowerCase().trim() + "%"));
-        }
 
         String courseId = params.get("courseId");
-        if (courseId != null && !courseId.isEmpty()) {
+        if (courseId != null && !courseId.isEmpty())
             predicates.add(b.equal(root.get("courseId").as(Integer.class), Integer.parseInt(courseId)));
-        }
 
-        String active = params.get("isActive");
-        if (active != null && !active.isEmpty()) {
-            predicates.add(b.equal(root.get("isActive"), Boolean.parseBoolean(active)));
-        }
+        String isActive = params.get("isActive");
+        if (isActive != null && !isActive.isEmpty())
+            predicates.add(b.equal(root.get("isActive"), Boolean.parseBoolean(isActive)));
 
         return predicates;
     }
 
     @Override
     public List<Lesson> getLessons(Map<String, String> params) {
-        Session session = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
         CriteriaQuery<Lesson> q = b.createQuery(Lesson.class);
         Root<Lesson> root = q.from(Lesson.class);
         q.select(root);
 
-        // Áp dụng bộ lọc
         List<Predicate> predicates = buildPredicates(b, root, params);
-        if (!predicates.isEmpty()) {
+        if (!predicates.isEmpty())
             q.where(predicates.toArray(Predicate[]::new));
-        }
 
-        // Áp dụng sắp xếp
-        if (params != null) {
-            String sort = params.getOrDefault("sort", "newest");
-            switch (sort) {
-                case "name_asc" ->
-                    q.orderBy(b.asc(root.get("subject")));
-                case "name_desc" ->
-                    q.orderBy(b.desc(root.get("subject")));
-                case "oldest" ->
-                    q.orderBy(b.asc(root.get("createdTime")));
-                default ->
-                    q.orderBy(b.desc(root.get("createdTime"))); // Mặc định mới nhất lên đầu
-            }
-        }
+        q.orderBy(b.asc(root.get("orderIndex")));
 
-        Query<Lesson> query = session.createQuery(q);
+        Query<Lesson> query = s.createQuery(q);
 
-        // Áp dụng phân trang
         if (params != null && params.containsKey("page")) {
-            int pageSize = this.env.getProperty("lessons.page_size", Integer.class);
+            int pageSize = this.env.getProperty("lessons.page_size", Integer.class, 20);
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            int start = (page - 1) * pageSize;
-
+            query.setFirstResult((page - 1) * pageSize);
             query.setMaxResults(pageSize);
-            query.setFirstResult(start);
         }
 
         return query.getResultList();
+    }
+    
+    @Override
+    public Long countLessons(Map<String, String> params) {
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Lesson> root = q.from(Lesson.class);
+        q.select(b.count(root));
+
+        List<Predicate> predicates = buildPredicates(b, root, params);
+        if (!predicates.isEmpty())
+            q.where(predicates.toArray(Predicate[]::new));
+
+        return s.createQuery(q).getSingleResult();
+    }
+    
+     @Override
+    public Long countLessonsByCourseId(int courseId) {
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Lesson> root = q.from(Lesson.class);
+        q.select(b.count(root)).where(b.equal(root.get("courseId").get("id"), courseId));
+        return s.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -109,9 +111,9 @@ public class LessonRepositoryImpl implements LessonRepository {
     public void addOrUpdateLesson(Lesson lesson) {
         Session session = this.factory.getObject().getCurrentSession();
         if (lesson.getId() != null) {
-            session.merge(lesson); // Dùng merge cho thao tác cập nhật
+            session.merge(lesson);
         } else {
-            session.persist(lesson); // Dùng persist cho thao tác thêm mới
+            session.persist(lesson);
         }
     }
 
@@ -123,24 +125,4 @@ public class LessonRepositoryImpl implements LessonRepository {
             session.remove(lesson);
         }
     }
-
-    @Override
-    public Long countLesson(Map<String, String> params) {
-        Session session = this.factory.getObject().getCurrentSession();
-
-        return DaoUtils.count(session, Lesson.class, (b, root) -> buildPredicates(b, root, params));
-    }
-
-    @Override
-    public Long countLessonByCourseId(int courseId) {
-        Session session = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Long> q = b.createQuery(Long.class);
-        Root<Lesson> root = q.from(Lesson.class);
-        q.select(b.count(root));
-        q.where(b.equal(root.get("courseId").get("id"), courseId));
-
-        return session.createQuery(q).getSingleResult();
-    }
-
 }

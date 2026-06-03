@@ -8,13 +8,13 @@ public interface LessonRepository {
 
     List<Lesson> getLessons(Map<String, String> params);
 
+    Long countLessons(Map<String, String> params);
+
+    Long countLessonsByCourseId(int courseId);
+
     Lesson getLessonById(int id);
 
     void addOrUpdateLesson(Lesson lesson);
 
     void deleteLesson(int id);
-
-    Long countLesson(Map<String, String> params);
-
-    Long countLessonByCourseId(int courseId);
 }

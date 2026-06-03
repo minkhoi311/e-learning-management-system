@@ -84,87 +84,65 @@ public class UserServiceImpl implements UserService {
         User u = new User();
         u.setFirstName(params.get("firstName"));
         u.setLastName(params.get("lastName"));
-        u.setPhone(params.get("phone"));
         u.setEmail(params.get("email"));
+        u.setPhone(params.get("phone"));
         u.setUsername(params.get("username"));
-        u.setPassword(passwordEncoder.encode(params.get("password")));
+        u.setPassword(this.passwordEncoder.encode(params.get("password")));
         u.setRole(params.getOrDefault("role", "STUDENT"));
         u.setIsInstructor(false);
         u.setIsAdmin(false);
+        u.setIsActive(true);
         u.setAuthProvider("LOCAL");
-        u.setIsActive(true); // Default là active
         u.setCreatedTime(new Date());
 
         if (avatar != null && !avatar.isEmpty()) {
             try {
-                Map res = this.cloudinary.uploader().upload(avatar.getBytes(),
-                        ObjectUtils.asMap("resource_type", "auto"));
+                Map res = this.cloudinary.uploader().upload(
+                    avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
                 u.setAvatar(res.get("secure_url").toString());
             } catch (IOException ex) {
                 Logger.getLogger(UserServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-        return this.userRepo.addUser(u);
+        this.userRepo.saveUser(u);
+        return u;
     }
     
     @Override
-    public User addUser(User user) {
-        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+    public void saveUser(User u) {
+        if (u.getId() == null) {
 
-        if (user.getRole() == null) user.setRole("STUDENT");
-        if (user.getIsInstructor() == null) user.setIsInstructor(false);
-        if (user.getIsAdmin() == null) user.setIsAdmin(false);
-        if (user.getIsActive() == null) user.setIsActive(true);
-        user.setAuthProvider("LOCAL");
-        user.setCreatedTime(new Date());
-        
-        processAvatarUpload(user);
-
-        return this.userRepo.addUser(user);
-    }
-
-    @Override
-    public User updateUser(User user) {
-        User existingUser = this.userRepo.getUserById(user.getId());
-
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setPhone(user.getPhone());
-        existingUser.setRole(user.getRole());
-        existingUser.setIsActive(user.getIsActive());
-        existingUser.setIsInstructor(user.getIsInstructor());
-        existingUser.setIsAdmin(user.getIsAdmin());
-        existingUser.setUpdatedTime(new Date());
-        processAvatarUpload(user);
-        if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
-            existingUser.setAvatar(user.getAvatar());
+            u.setPassword(this.passwordEncoder.encode(u.getPassword()));
+            if (u.getRole() == null) u.setRole("STUDENT");
+            if (u.getIsInstructor() == null) u.setIsInstructor(false);
+            if (u.getIsAdmin() == null) u.setIsAdmin(false);
+            if (u.getIsActive() == null) u.setIsActive(true);
+            u.setAuthProvider("LOCAL");
+            u.setCreatedTime(new Date());
+        } else {
+            u.setUpdatedTime(new Date());
         }
-        return this.userRepo.updateUser(existingUser);
+        processAvatarUpload(u);
+        this.userRepo.saveUser(u);
     }
-
     @Override
-    public boolean unActiveUser(int id) {
-        User user = this.userRepo.getUserById(id);
-        if (user != null) {
-            user.setIsActive(false);
-            user.setUpdatedTime(new Date());
-            this.userRepo.updateUser(user);
-            return true;
-        }
-        return false;
-    }
+    public User updateProfile(User input, String username) {
+        User existing = this.userRepo.getUserByUsername(username);
+        if (existing == null) return null;
 
-    @Override
-    public boolean activeUser(int id) {
-        User user = this.userRepo.getUserById(id);
-        if (user != null) {
-            user.setIsActive(true);
-            user.setUpdatedTime(new Date());
-            this.userRepo.updateUser(user);
-            return true;
-        }
-        return false;
+        if (input.getFirstName() != null && !input.getFirstName().isBlank())
+            existing.setFirstName(input.getFirstName());
+        if (input.getLastName() != null && !input.getLastName().isBlank())
+            existing.setLastName(input.getLastName());
+
+        processAvatarUpload(input);
+        if (input.getAvatar() != null && !input.getAvatar().isEmpty())
+            existing.setAvatar(input.getAvatar());
+
+        existing.setUpdatedTime(new Date());
+        this.userRepo.saveUser(existing);
+        return existing;
     }
 
     @Override
@@ -173,7 +151,7 @@ public class UserServiceImpl implements UserService {
         if (user != null && "INSTRUCTOR".equals(user.getRole())) {
             user.setIsInstructor(true);
             user.setUpdatedTime(new Date());
-            this.userRepo.updateUser(user);
+            this.userRepo.saveUser(user);
             return true;
         }
         return false;
@@ -195,14 +173,12 @@ public class UserServiceImpl implements UserService {
 
         u.setPassword(this.passwordEncoder.encode(newPassword));
         u.setUpdatedTime(new Date());
-        this.userRepo.updateUser(u);
+        this.userRepo.saveUser(u);
     }
 
     @Override
     public boolean authenticate(String username, String password) {
-        User u = this.userRepo.getUserByUsername(username);
-        if (u == null) return false;
-        return this.passwordEncoder.matches(password, u.getPassword());
+        return this.userRepo.authenticate(username, password);
     }
 
     @Override
@@ -217,29 +193,6 @@ public class UserServiceImpl implements UserService {
 
         return new org.springframework.security.core.userdetails.User(user.getUsername(),
                 user.getPassword(), authorities);
-    }
-    
-    @Override
-    public User updateCurrentUser(User u, String username) {
-        User existing = this.userRepo.getUserByUsername(username);
-        if (existing == null) {
-            return null;
-        }
-
-        if (u.getFirstName() != null && !u.getFirstName().isBlank()) {
-            existing.setFirstName(u.getFirstName());
-        }
-        if (u.getLastName() != null && !u.getLastName().isBlank()) {
-            existing.setLastName(u.getLastName());
-        }
-
-        processAvatarUpload(u);
-        if (u.getAvatar() != null && !u.getAvatar().isEmpty()) {
-            existing.setAvatar(u.getAvatar());
-        }
-        existing.setUpdatedTime(new Date());
-
-        return this.userRepo.updateUser(existing);
     }
 
 }

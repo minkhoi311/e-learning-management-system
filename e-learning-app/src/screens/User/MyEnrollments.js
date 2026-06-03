@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Container, Row, Col, Card, Button, Alert, ProgressBar, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, ProgressBar } from 'react-bootstrap';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { authApis, endpoints } from '../../configs/Apis';
 import { MyUserContext } from '../../configs/Contexts';
@@ -25,9 +25,15 @@ const MyEnrollments = () => {
         setLoading(true);
         setError(null);
         try {
-            // Gọi endpoint: GET /api/secure/enrollments
             let res = await authApis().get(endpoints['my-enrollments']);
-            setEnrollments(Array.isArray(res.data) ? res.data : []); 
+            
+            // NOTE: Chỉ lọc ra và giữ lại những khóa học ĐÃ THANH TOÁN THÀNH CÔNG
+            const successfulEnrollments = Array.isArray(res.data) 
+                ? res.data.filter(e => e.payment && e.payment.status === 'SUCCESS')
+                : [];
+                
+            setEnrollments(successfulEnrollments); 
+            
         } catch (err) {
             console.error("Lỗi khi lấy danh sách khóa học:", err);
             setError("Không thể tải danh sách khóa học. Vui lòng thử lại sau.");
@@ -67,7 +73,6 @@ const MyEnrollments = () => {
                 Khóa học của tôi
             </h2>
 
-    
             {paymentMsg && (
                 <Alert variant={paymentMsg.type} className="fw-bold shadow-sm" onClose={() => setPaymentMsg(null)} dismissible>
                     {paymentMsg.text}
@@ -76,11 +81,12 @@ const MyEnrollments = () => {
 
             {error && <Alert variant="danger">{error}</Alert>}
 
+            {/* NOTE: Nếu mảng rỗng (kể cả do đã lọc hết các khóa chưa thanh toán) thì hiện thông báo */}
             {!loading && enrollments.length === 0 && !error && (
                 <Alert variant="info" className="text-center p-5 shadow-sm">
                     <i className="bi bi-journal-x display-1 text-muted mb-3"></i>
-                    <h4>Bạn chưa đăng ký khóa học nào!</h4>
-                    <p className="text-muted">Hãy tìm kiếm khóa học để bắt đầu lộ trình học tập của mình.</p>
+                    <h4>Bạn chưa có khóa học nào được kích hoạt!</h4>
+                    <p className="text-muted">Bạn chưa đăng ký hoặc chưa hoàn tất thanh toán khóa học nào. Hãy tìm kiếm và mua khóa học để bắt đầu.</p>
                     <Button variant="primary" className="mt-2 rounded-pill px-4" onClick={() => nav('/courses')}>
                         Xem danh sách khóa học
                     </Button>
@@ -90,8 +96,6 @@ const MyEnrollments = () => {
             <Row className="g-4">
                 {enrollments.map(e => {
                     if (!e || !e.courseId) return null; 
-                    
-                    const paymentInfo = e.payment; 
 
                     return (
                         <Col key={e.id} xs={12} sm={6} md={4} lg={3}>
@@ -123,35 +127,17 @@ const MyEnrollments = () => {
                                             style={{ height: '8px' }} 
                                         />
                                     </div>
-
-                                    {/* PHẦN HIỂN THỊ TRẠNG THÁI THANH TOÁN (HỢP NHẤT LOGIC MỚI) */}
-                                    <div className="mb-3 d-flex justify-content-between align-items-center small">
-                                        <span className="text-muted">Trạng thái:</span>
-                                        {paymentInfo && paymentInfo.status === 'SUCCESS' ? (
-                                            <Badge bg="success">Đã mở khóa</Badge>
-                                        ) : paymentInfo && paymentInfo.paymentMethod === 'CASH' ? (
-                                            <Badge bg="warning" text="dark">Chờ thu tiền mặt</Badge>
-                                        ) : (
-                                            <Badge bg="secondary">Chưa thanh toán</Badge>
-                                        )}
-                                    </div>
                                     
                                     <div className="text-muted small mb-3">
                                         <i className="bi bi-calendar-check me-1"></i>
                                         Đăng ký: {e.enrolledTime ? new Date(e.enrolledTime).toLocaleDateString('vi-VN') : 'N/A'}
                                     </div>
 
+                                    {/* NOTE: Nút bấm chỉ hiện 1 trạng thái duy nhất vì chắc chắn khóa này đã thanh toán */}
                                     <div className="d-grid mt-auto">
-                                        {/* Kiểm tra đúng trường status của đối tượng Payment bên trong Enrollment */}
-                                        {paymentInfo && paymentInfo.status === 'SUCCESS' ? (
-                                            <Button variant="primary" onClick={() => nav(`/courses/${e.courseId.id}`)}>
-                                                <i className="bi bi-play-circle me-1"></i> Vào học tiếp
-                                            </Button>
-                                        ) : (
-                                            <Button variant="light" disabled className="text-muted border">
-                                                <i className="bi bi-lock-fill me-1"></i> Khóa học đang đóng
-                                            </Button>
-                                        )}
+                                        <Button variant="primary" onClick={() => nav(`/courses/${e.courseId.id}`)}>
+                                            <i className="bi bi-play-circle me-1"></i> Vào học tiếp
+                                        </Button>
                                     </div>
                                 </Card.Body>
                             </Card>

@@ -45,16 +45,12 @@ public class DispatcherServletInit extends AbstractAnnotationConfigDispatcherSer
     @Override
     protected void customizeRegistration(ServletRegistration.Dynamic registration) {
         String location = "/";
-        long maxFileSize = 5242880; // 5MB
-        long maxRequestSize = 20971520; // 20MB
+        long maxFileSize = 5242880; 
+        long maxRequestSize = 20971520;
         int fileSizeThreshold = 0;
 
         registration.setMultipartConfig(new MultipartConfigElement(location, maxFileSize, maxRequestSize, fileSizeThreshold));
     }
     
-//    @Override
-//    protected Filter[] getServletFilters() {
-//        return new Filter[] { new JwtFilter()}; 
-//    }
     
 }

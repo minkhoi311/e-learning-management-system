@@ -21,14 +21,10 @@ public interface UserService  extends UserDetailsService{
     User getUserById(int id);
     User getUserByUsername(String username);
     List<User> getUsersByRole(String role);
-    User updateUser(User user);
-    User updateCurrentUser(User u, String username);
-    void changePassword(String username, String oldPassword, String newPassword);
-    boolean unActiveUser(int id);
-    boolean activeUser(int id);
-    boolean approveInstructor(int id);
-    User addUser(User user);
     User addUser(Map<String, String> params, MultipartFile avatar);
-    UserDetails loadUserByUsername(String username);
+    void saveUser(User u);
+    User updateProfile(User input, String username);
+    void changePassword(String username, String oldPassword, String newPassword);
+    boolean approveInstructor(int id);
     boolean authenticate(String username, String password);
 }

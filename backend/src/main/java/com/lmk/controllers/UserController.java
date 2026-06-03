@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lmk.controllers;
 
 import com.lmk.pojo.User;
 import com.lmk.services.UserService;
 import com.lmk.utils.DaoUtils;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- *
- * @author Acer
- */
 @Controller
 @RequestMapping("/admin")
 public class UserController {
@@ -42,11 +32,9 @@ public class UserController {
             params.put("page", "1");
         }
 
-        // Lấy danh sách người dùng
         List<User> users = userService.getUsers(params);
         model.addAttribute("users", users);
 
-        // Tính toán phân trang
         Long totalItems = userService.countUsers(params);
         int pageSize = Integer.parseInt(env.getProperty("users.page_size", "10"));
         int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
@@ -70,19 +58,17 @@ public class UserController {
     }
 
     @PostMapping("/users/save")
-    public String saveUser(@ModelAttribute("user") User user, RedirectAttributes redirectAttrs) {
+    public String saveUser(@ModelAttribute("user") User user) {
         if (user.getId() != null) {
-            this.userService.updateUser(user);
-            redirectAttrs.addFlashAttribute("successMsg", "Cập nhật tài khoản thành công!");
+            this.userService.saveUser(user);
         } else {
-            this.userService.addUser(user);
-            redirectAttrs.addFlashAttribute("successMsg", "Thêm người dùng thành công!");
+            this.userService.saveUser(user);
         }
         return "redirect:/admin/users";
     }
 
     @GetMapping("/login")
-        public String loginView() {
-            return "login";
-        }
+    public String loginView() {
+        return "login";
+    }
 }

@@ -43,7 +43,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
     }
 
     @Override
-    public void save(LessonProgress progress) {
+    public void saveProgress(LessonProgress progress) {
         Session session = this.factory.getObject().getCurrentSession();
         session.persist(progress);
     }

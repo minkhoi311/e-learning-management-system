@@ -1,14 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lmk.controllers;
 
 import com.lmk.pojo.Course;
 import com.lmk.pojo.User;
 import com.lmk.services.CourseService;
 import com.lmk.services.UserService;
-import com.lmk.utils.DaoUtils;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- *
- * @author Acer
- */
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
@@ -50,24 +41,23 @@ public class ApiCourseController {
 
     @GetMapping("/courses")
     public ResponseEntity<Map<String, Object>> list(@RequestParam Map<String, String> params) {
-        List<Course> courses = this.courseService.getCourses(params);
-        Long totalItems = this.courseService.countCourse(params);
         int pageSize = Integer.parseInt(env.getProperty("courses.page_size", "20"));
-        int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
         int currentPage = Integer.parseInt(params.getOrDefault("page", "1"));
+        long totalItems = this.courseService.countCourses(params);
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("courses", courses);
-        response.put("totalItems", totalItems);
-        response.put("totalPages", totalPages);
-        response.put("currentPage", currentPage);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Map<String, Object> res = new HashMap<>();
+        res.put("courses", this.courseService.getCourses(params));
+        res.put("totalItems", totalItems);
+        res.put("totalPages", totalPages);
+        res.put("currentPage", currentPage);
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/courses/compare")
     public ResponseEntity<List<Course>> compare(@RequestParam("ids") String ids) {
         if (ids == null || ids.isBlank()) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         List<Course> result = this.courseService.getCoursesByIds(ids);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -84,45 +74,42 @@ public class ApiCourseController {
 
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @PostMapping("/secure/courses")
-    public ResponseEntity<Object> create(@ModelAttribute Course c, Principal principal) {
+    public ResponseEntity<Course> create(@ModelAttribute Course c, Principal principal) {
         User u = userService.getUserByUsername(principal.getName());
         c.setInstructorId(u);
 
         Map<String, String> errors = this.courseService.validate(c);
         if (!errors.isEmpty()) {
-            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         this.courseService.addOrUpdateCourse(c);
-        return new ResponseEntity<>(Map.of("message", "Tạo khóa học thành công!"), HttpStatus.CREATED);
+        return new ResponseEntity<>(c, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @PatchMapping("/secure/courses/{courseId}")
-    public ResponseEntity<Object> update(@PathVariable("courseId") int courseId, @ModelAttribute Course c, Principal principal) {
-
-        // 1. KIỂM TRA QUYỀN SỞ HỮU
+    public ResponseEntity<Course> update(@PathVariable("courseId") int courseId, @ModelAttribute Course c, Principal principal) {
         Course existingCourse = this.courseService.getCourseById(courseId);
         if (existingCourse == null) {
-            return new ResponseEntity<>(Map.of("message", "Khóa học không tồn tại!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // Nếu người đang đăng nhập KHÔNG PHẢI là chủ khóa học (và cũng không phải ADMIN) -> Đuổi ra
         User u = userService.getUserByUsername(principal.getName());
         if (u.getRole().equals("INSTRUCTOR") && !existingCourse.getInstructorId().getUsername().equals(u.getUsername())) {
-            return new ResponseEntity<>(Map.of("message", "CẢNH BÁO: Bạn không có quyền sửa khóa học của người khác!"), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         c.setId(courseId);
-        c.setInstructorId(existingCourse.getInstructorId()); // Giữ nguyên chủ sở hữu gốc
+        c.setInstructorId(existingCourse.getInstructorId());
 
         Map<String, String> errors = this.courseService.validate(c);
         if (!errors.isEmpty()) {
-            return ResponseEntity.badRequest().body(errors);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         this.courseService.addOrUpdateCourse(c);
-        return new ResponseEntity<>(Map.of("message", "Cập nhật khóa học thành công!"), HttpStatus.OK);
+        return new ResponseEntity<>(c, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
@@ -130,18 +117,5 @@ public class ApiCourseController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable(value = "courseId") int courseId, Principal principal) {
         this.courseService.deleteCourse(courseId);
-//        Course existingCourse = this.courseService.getCourseById(courseId);
-//        if (existingCourse != null) {
-//            User u = userService.getUserByUsername(principal.getName());
-//
-//            if (u.getRole().equals("INSTRUCTOR") && !existingCourse.getInstructorId().getUsername().equals(u.getUsername())) {
-//                return new ResponseEntity<>(Map.of("message", "CẢNH BÁO: Bạn không có quyền xóa khóa học của người khác!"), HttpStatus.FORBIDDEN);
-//            }
-//        }
-//
-//        this.courseService.deleteCourse(courseId);
-//        return new ResponseEntity<>(Map.of("message", "Đã xóa khóa học thành công!"), HttpStatus.OK);
-//    }
     }
-
 }

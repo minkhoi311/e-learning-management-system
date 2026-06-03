@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lmk.controllers;
 
 import com.lmk.services.StatsService;
@@ -19,16 +15,12 @@ public class StatsController {
     @Autowired
     private StatsService statsService;
 
-    // Admin xem báo cáo tổng quan
-    // @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/stats")
     public String adminStats(Model model) {
         model.addAttribute("stats", statsService.getAdminStats());
         return "stats-admin";
     }
 
-    // Giảng viên xem thống kê của mình
-    // @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/stats/my")
     public String instructorStats(Model model, Principal principal) {
         if (principal == null) return "redirect:/login";

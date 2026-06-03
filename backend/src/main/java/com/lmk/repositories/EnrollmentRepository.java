@@ -12,10 +12,9 @@ import java.util.List;
  * @author Acer
  */
 public interface EnrollmentRepository {
-    List<Enrollment> getByStudent(int studentId);
     Enrollment getById(int id);
     Enrollment getByStudentAndCourse(int studentId, int courseId);
-    Enrollment enroll(Enrollment e);
-    Enrollment update(Enrollment e);
-    List<Enrollment> findByCourseId(int courseId);
+    List<Enrollment> getByStudentId(int studentId);
+    List<Enrollment> getByCourseId(int courseId);
+    void addOrUpdateEnrollment(Enrollment e);
 }

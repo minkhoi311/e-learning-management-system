@@ -12,7 +12,7 @@ import java.util.List;
  * @author Acer
  */
 public interface LessonCommentService {
-    public List<LessonComment> getByLesson(int lessonId);
-    public LessonComment add(int lessonId, String content, Integer parentId, String username);
-    public boolean delete(int commentId, String username);
+    List<LessonComment> getByLesson(int lessonId);
+    LessonComment addComment(int lessonId, String content, String username);
+    boolean deleteComment(int commentId, String username);
 }

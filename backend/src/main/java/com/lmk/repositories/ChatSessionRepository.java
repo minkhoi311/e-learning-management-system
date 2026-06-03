@@ -14,6 +14,6 @@ import java.util.List;
  */
 public interface ChatSessionRepository {
     ChatSession getByRoomId(String roomId);
-    ChatSession saveOrUpdate(ChatSession chatSession);
+    void saveOrUpdate(ChatSession chatSession);
     List<ChatSession> getSessionsByUser(User user);
 }

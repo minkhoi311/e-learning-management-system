@@ -4,7 +4,6 @@
  */
 package com.lmk.repositories.impl;
 
-import com.lmk.pojo.Enrollment;
 import com.lmk.pojo.LessonComment;
 import com.lmk.repositories.LessonCommentRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -50,18 +49,16 @@ public class LessonCommentRepositoryImpl implements LessonCommentRepository{
     }
     
     @Override
-    public LessonComment add(LessonComment c) {
+    public void saveComment(LessonComment c) {
         Session session = this.factory.getObject().getCurrentSession();
         session.persist(c);
-        return c;
     }
 
     @Override
-    public boolean delete(int id) {
+    public void deleteComment(int id) {
         Session session = this.factory.getObject().getCurrentSession();
         LessonComment c = session.get(LessonComment.class, id);
-        if (c == null) return false;
-        session.remove(c);
-        return true;
+        if (c != null) 
+            session.remove(c);
     }
 }

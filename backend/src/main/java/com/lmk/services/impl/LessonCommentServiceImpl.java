@@ -36,27 +36,28 @@ public class LessonCommentServiceImpl implements LessonCommentService{
         return this.commentRepo.getByLesson(lessonId);    }
 
     @Override
-    public LessonComment add(int lessonId, String content, Integer parentId, String username) {
+    public LessonComment addComment(int lessonId, String content, String username) {
         if (content == null || content.isBlank()) return null;
+
         User u = this.userRepo.getUserByUsername(username);
-        Lesson lesson = this.lessonRepo.getLessonById(lessonId);
-        if (u == null || lesson == null) return null;
-         
+        Lesson l = this.lessonRepo.getLessonById(lessonId);
+        if (u == null || l == null) return null;
+
         LessonComment c = new LessonComment();
         c.setContent(content.trim());
-        c.setLessonId(lesson);
+        c.setLessonId(l);
         c.setUserId(u);
         c.setCreatedTime(new Date());
-        return this.commentRepo.add(c);
+        this.commentRepo.saveComment(c);
+        return c;
     }
 
     @Override
-    public boolean delete(int commentId, String username) {
+    public boolean deleteComment(int commentId, String username) {
         LessonComment c = this.commentRepo.getById(commentId);
         if (c == null) return false;
-        boolean isOwner = c.getUserId().getUsername().equals(username);
-        if(!isOwner) return false;
-        return this.commentRepo.delete(commentId);
+        if (!c.getUserId().getUsername().equals(username)) return false;
+        this.commentRepo.deleteComment(commentId);
+        return true;
     }
-    
 }

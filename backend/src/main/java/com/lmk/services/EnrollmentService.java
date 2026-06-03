@@ -14,12 +14,10 @@ import java.util.Map;
  */
 public interface EnrollmentService {
     List<Enrollment> getByUsername(String username);
-    Enrollment enroll(int courseId, String username);
     Enrollment getByStudentAndCourse(int studentId, int courseId);
-    void markLessonAsCompleted(int enrollmentId, int lessonId);
-    String createPaymentSession(int enrollmentId, String method, String username);
+    Enrollment enroll(int courseId, String username);
+    List<Enrollment> getEnrollmentsByCourse(int courseId);
+    void markLessonCompleted(int enrollmentId, int lessonId);
     Enrollment updatePaymentMethod(int enrollmentId, String method);
     boolean processWebhook(Map<String, Object> payload);
-
-    List<Enrollment> getEnrollmentsByCourse(int courseId);
 }

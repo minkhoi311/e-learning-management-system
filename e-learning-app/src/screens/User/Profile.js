@@ -47,21 +47,20 @@ const Profile = () => {
             form.append('email', profile.email);
             form.append('phone', profile.phone || '');
             
-
             if (avatarRef.current.files.length > 0) {
                 form.append('avatar', avatarRef.current.files[0]);
             }
 
-            let res = await authApis().post(endpoints['profile'], form, {
+            // SỬ DỤNG PATCH VÌ BACKEND CHỈ HỖ TRỢ PATCH
+            let res = await authApis().patch(endpoints['profile'], form, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            // Cập nhật lại Context & Cookie để Header hiển thị ảnh/tên mới
-            dispatch({ type: 'LOGIN', payload: res.data });
-            
-            // Cập nhật state nội bộ
-            setProfile(res.data);
-            setMsg({ type: 'success', text: 'Cập nhật thông tin thành công!' });
+            if (res.status === 200) {
+                dispatch({ type: 'LOGIN', payload: res.data });
+                setProfile(res.data);
+                setMsg({ type: 'success', text: 'Cập nhật thông tin thành công!' });
+            }
         } catch (ex) {
             console.error(ex);
             setMsg({ type: 'danger', text: 'Cập nhật thất bại. Vui lòng kiểm tra lại!' });

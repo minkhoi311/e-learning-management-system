@@ -29,7 +29,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public List<Enrollment> getByStudent(int studentId) {
+    public List<Enrollment> getByStudentId(int studentId) {
         Session session = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
@@ -66,33 +66,25 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     }
 
     @Override
-    public Enrollment enroll(Enrollment e) {
+    public void addOrUpdateEnrollment(Enrollment e) {
         Session session = this.factory.getObject().getCurrentSession();
-        session.persist(e);
-        return e;
+        if (e.getId() != null) {
+            session.merge(e);
+        } else {
+            session.persist(e);
+        }
     }
 
     @Override
-    public Enrollment update(Enrollment e) {
-        Session session = this.factory.getObject().getCurrentSession();
-        return (Enrollment) session.merge(e);
-    }
-
-    @Override
-    public List<Enrollment> findByCourseId(int courseId) {
+    public List<Enrollment> getByCourseId(int courseId) {
         Session session = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
         q.select(root);
-
-        // Lọc theo course_id
         q.where(b.equal(root.get("courseId").get("id"), courseId));
-
-        // Sắp xếp theo thời gian đăng ký mới nhất
         q.orderBy(b.desc(root.get("enrolledTime")));
-
         Query<Enrollment> query = session.createQuery(q);
         return query.getResultList();
     }

@@ -32,7 +32,8 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
         basePackages = {
             "com.lmk.controllers",
             "com.lmk.repositories",
-            "com.lmk.services"
+            "com.lmk.services",
+            "com.lmk.filters",
         }
 )
 @Order(2)
@@ -84,19 +85,4 @@ public class SpringSecurityConfigs {
         return cloudinary;
     }
 
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration config = new CorsConfiguration();
-//
-//        config.setAllowedOrigins(List.of("http://localhost:3000")); 
-//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-//        config.setExposedHeaders(List.of("Authorization"));
-//        config.setAllowCredentials(true); 
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//
-//        return source;
-//    }
 }

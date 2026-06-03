@@ -5,17 +5,14 @@
 package com.lmk.controllers;
 
 import com.lmk.services.CategoryService;
-import com.lmk.services.CourseService;
 import com.lmk.services.UserService;
 import java.security.Principal;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  *

@@ -33,46 +33,33 @@ public class LessonServiceImpl implements LessonService {
     public Lesson getLessonById(int id) {
         return this.lessonRepo.getLessonById(id);
     }
+    
+    @Override
+    public Long countLessons(Map<String, String> params) {
+        return this.lessonRepo.countLessons(params);
+    }
 
     @Override
     public void addOrUpdateLesson(Lesson l) {
-        // 1. Xử lý Upload Ảnh (Nếu có)
         if (l.getFile() != null && !l.getFile().isEmpty()) {
             try {
-                Map res = this.cloudinary.uploader().upload(l.getFile().getBytes(),
-                        ObjectUtils.asMap("resource_type", "auto"));
+                Map res = this.cloudinary.uploader().upload(
+                    l.getFile().getBytes(), ObjectUtils.asMap("resource_type", "auto"));
                 l.setImage(res.get("secure_url").toString());
             } catch (IOException ex) {
                 Logger.getLogger(LessonServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-        // 2. Phân nhánh Cập nhật / Thêm mới
-        if (l.getId() != null) {
-            Lesson existingLesson = lessonRepo.getLessonById(l.getId());
-            existingLesson.setSubject(l.getSubject());
-            existingLesson.setContent(l.getContent());
-            existingLesson.setCourseId(l.getCourseId());
-            existingLesson.setIsActive(l.getIsActive());
-            existingLesson.setUpdatedTime(new Date());
+        if (l.getId() == null) l.setCreatedTime(new Date());
+        else l.setUpdatedTime(new Date());
 
-            if (l.getImage() != null && !l.getImage().isEmpty()) {
-                existingLesson.setImage(l.getImage());
-            }
-            this.lessonRepo.addOrUpdateLesson(existingLesson);
-        } else {
-            l.setCreatedTime(new Date());
-            this.lessonRepo.addOrUpdateLesson(l);
-        }
+        this.lessonRepo.addOrUpdateLesson(l);
     }
+
 
     @Override
     public void deleteLesson(int id) {
         this.lessonRepo.deleteLesson(id);
-    }
-
-    @Override
-    public Long countLesson(Map<String, String> params) {
-        return this.lessonRepo.countLesson(params);
     }
 }

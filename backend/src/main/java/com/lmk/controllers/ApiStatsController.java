@@ -1,8 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lmk.controllers;
+
 import com.lmk.services.StatsService;
 import java.security.Principal;
 import java.util.Map;
@@ -22,11 +19,9 @@ public class ApiStatsController {
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/secure/stats/overview")
-    public ResponseEntity<Object> instructorStats(Principal principal) {
-
+    public ResponseEntity<Map<String, Object>> instructorStats(Principal principal) {
         if (principal == null)
-            return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"),HttpStatus.UNAUTHORIZED);
-
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(this.statsService.getInstructorStats(principal.getName()),HttpStatus.OK);
     }
 

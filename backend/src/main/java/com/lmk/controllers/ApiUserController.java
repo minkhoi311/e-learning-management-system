@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lmk.controllers;
 
 import com.lmk.pojo.User;
@@ -12,7 +8,6 @@ import java.util.Collections;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,10 +22,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- *
- * @author Acer
- */
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
@@ -45,6 +36,7 @@ public class ApiUserController {
         User u = this.userService.addUser(info, avatar);
         return new ResponseEntity<>(u, HttpStatus.CREATED);
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User u) {
@@ -66,8 +58,8 @@ public class ApiUserController {
     }
 
     @PatchMapping("/secure/profile")
-    public ResponseEntity<Object> updateCurrentUser(@ModelAttribute User u, Principal principal) {
-        return new ResponseEntity<>(this.userService.updateCurrentUser(u, principal.getName()), HttpStatus.OK);
+    public ResponseEntity<User> updateCurrentUser(@ModelAttribute User u, Principal principal) {
+        return new ResponseEntity<>(this.userService.updateProfile(u, principal.getName()), HttpStatus.OK);
     }
 
     @PostMapping("/secure/change-password")
@@ -80,35 +72,22 @@ public class ApiUserController {
     
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/secure/users/approve")
-    public ResponseEntity<Object> approveInstructor(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<Void> approveInstructor(@RequestBody Map<String, Object> payload) {
         try {
             if (payload == null || !payload.containsKey("id")) {
-                return new ResponseEntity<>(
-                        Map.of("message", "Thiếu ID người dùng!"),
-                        HttpStatus.BAD_REQUEST
-                );
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             int id = Integer.parseInt(payload.get("id").toString());
             boolean ok = this.userService.approveInstructor(id);
 
             if (!ok) {
-                return new ResponseEntity<>(
-                        Map.of("message", "Không tìm thấy hoặc không phải giảng viên!"),
-                        HttpStatus.NOT_FOUND
-                );
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            return new ResponseEntity<>(
-                    Map.of("message", "Đã duyệt thành công!"),
-                    HttpStatus.OK
-            );
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (NumberFormatException e) {
-            return new ResponseEntity<>(
-                    Map.of("message", "ID không hợp lệ!"),
-                    HttpStatus.BAD_REQUEST
-            );
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
 }

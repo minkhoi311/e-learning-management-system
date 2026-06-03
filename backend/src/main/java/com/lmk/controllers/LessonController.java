@@ -9,7 +9,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ public class LessonController {
     @Autowired
     private Environment env;
 
-    // 1. DANH SÁCH BÀI HỌC (Có Lọc & Phân trang)
     @GetMapping("/lessons")
     public String listLessons(Model model, @RequestParam Map<String, String> params) {
         int currentPage = Integer.parseInt(params.getOrDefault("page", "1"));
@@ -35,7 +33,7 @@ public class LessonController {
         model.addAttribute("lessons", lessons);
         model.addAttribute("courses", courseService.getCourses(null));
 
-        Long totalItems = lessonService.countLesson(params);
+        Long totalItems = lessonService.countLessons(params);
         int pageSize = Integer.parseInt(env.getProperty("lessons.page_size", "6"));
         int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
 
@@ -44,7 +42,6 @@ public class LessonController {
         return "lesson";
     }
 
-    // 2. MỞ FORM THÊM MỚI
     @GetMapping("/lessons/add")
     public String addView(Model model) {
         model.addAttribute("lesson", new Lesson());
@@ -60,11 +57,9 @@ public class LessonController {
 
     @GetMapping("/lessons/{lessonId}")
     public String updateView(Model model, @PathVariable(value = "lessonId") int id) {
-
         Lesson currentLesson = this.lessonService.getLessonById(id);
         model.addAttribute("lesson", currentLesson);
         model.addAttribute("courses", courseService.getCourses(null));
-
 
         if (currentLesson.getCourseId() != null) {
             model.addAttribute("selectedCourseId", currentLesson.getCourseId().getId());

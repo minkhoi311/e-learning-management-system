@@ -57,7 +57,6 @@ const LessonDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lessonId]);
 
-    // Thêm bình luận
     const addComment = async () => {
         try {
             let res = await authApis().post(endpoints['addComment'](lessonId), {
@@ -69,10 +68,11 @@ const LessonDetail = () => {
             }
         } catch (ex) {
             console.error(ex);
+            alert("Bình luận thất bại hoặc nội dung trống!");
         }
     };
 
-    // Đánh dấu hoàn thành
+// Hoàn thành khóa học
     const handleComplete = async () => {
         if (!enrollmentId) {
             alert("Bạn chưa đăng ký khóa học này hoặc chưa đăng nhập!");
@@ -81,9 +81,11 @@ const LessonDetail = () => {
 
         try {
             setLoading(true);
-            await authApis().post(endpoints['complete-lesson'](enrollmentId, lessonId));
-            alert("Đánh dấu hoàn thành thành công!");
-            nav('/my-enrollments');
+            let res = await authApis().post(endpoints['complete-lesson'](enrollmentId, lessonId));
+            if (res.status === 200) {
+                alert("Đánh dấu hoàn thành bài học thành công!");
+                nav('/my-enrollments');
+            }
         } catch (err) {
             console.error(err);
             alert("Lỗi khi lưu tiến độ!");

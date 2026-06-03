@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lmk.controllers;
 
 import com.lmk.pojo.Course;
@@ -21,12 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-/**
- *
- * @author Acer
- */
 
 @Controller
 @RequestMapping("/admin")
@@ -44,59 +34,39 @@ public class CourseController {
     @Autowired
     private Environment env;
     
-    
     @GetMapping("/courses")
     public String listCourses(Model model, @RequestParam Map<String, String> params) {
-        
-        // 1. Lấy danh sách khóa học (Đã áp dụng Filter và Phân trang bên Repository)
         List<Course> list = courseService.getCourses(params);
         model.addAttribute("courses", list);
-
-        // 2. Gửi thêm Categories để đổ vào giao diện (nếu bạn có thanh tìm kiếm theo danh mục)
         model.addAttribute("categories", categoryService.getCates());
 
-        // 3. LOGIC PHÂN TRANG
-        // Đếm tổng số khóa học thỏa mãn điều kiện lọc
-        Long totalItems = courseService.countCourse(params);
-        
-        // Lấy số mục trên mỗi trang từ cấu hình (Mặc định là 6 nếu không tìm thấy)
+        Long totalItems = courseService.countCourses(params);
         int pageSize = Integer.parseInt(env.getProperty("courses.page_size", "20"));
-
-        // Tính tổng số trang bằng Utils
         int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
 
-        // Đẩy xuống Model để HTML hiển thị nút bấm
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", Integer.parseInt(params.getOrDefault("page", "1")));
 
         return "course"; 
     }
     
-    // 2. MỞ form Thêm mới (Phương thức GET)
     @GetMapping("/courses/add")
     public String addView(Model model) {
-        // Gửi một đối tượng Course rỗng để Thymeleaf map form (th:object)
         model.addAttribute("course", new Course());
-        // Cần categories cho cái Dropdown chọn danh mục
         model.addAttribute("categories", categoryService.getCates());
         model.addAttribute("instructors", userService.getUsersByRole("INSTRUCTOR"));
         return "course-detail"; 
     }
     
-    // 3. XỬ LÝ lưu dữ liệu khi submit form (Phương thức POST)
     @PostMapping("/courses/add")
     public String create(@ModelAttribute(value = "course") Course c) {
         this.courseService.addOrUpdateCourse(c);
-        // Sửa lại: redirect về danh sách khóa học của admin thay vì trang chủ
         return "redirect:/admin/courses";
     }
     
-    // 4. MỞ form Cập nhật (Phương thức GET)
     @GetMapping("/courses/{courseId}")
     public String updateView(Model model, @PathVariable(value = "courseId") int id) {
-        // Sửa "courses" thành "course" cho khớp với file html
         model.addAttribute("course", this.courseService.getCourseById(id));
-        // Bổ sung danh sách categories cho Dropdown
         model.addAttribute("categories", categoryService.getCates());
         model.addAttribute("instructors", userService.getUsersByRole("INSTRUCTOR"));
         return "course-detail";
@@ -109,5 +79,4 @@ public class CourseController {
         this.courseService.addOrUpdateCourse(c);
         return "redirect:/admin/courses";
     }
-    
 }

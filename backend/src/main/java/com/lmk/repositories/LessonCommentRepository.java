@@ -17,7 +17,7 @@ public interface LessonCommentRepository {
     
     LessonComment getById(int id);
     
-    LessonComment add(LessonComment c);
+    void saveComment(LessonComment c);
     
-    boolean delete(int id);
+    void deleteComment(int id);
 }

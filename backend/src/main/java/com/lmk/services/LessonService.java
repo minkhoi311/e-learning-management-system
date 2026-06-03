@@ -13,9 +13,9 @@ import java.util.Map;
  * @author Acer
  */
 public interface LessonService {
-    public List<Lesson> getLessons(Map<String, String> params);
-    public Lesson getLessonById(int id);
-    public void addOrUpdateLesson(Lesson l);
-    public void deleteLesson(int id);
-    public Long countLesson(Map<String, String> params);        
+    List<Lesson> getLessons(Map<String, String> params);
+    Long countLessons(Map<String, String> params);
+    Lesson getLessonById(int id);
+    void addOrUpdateLesson(Lesson l);
+    void deleteLesson(int id);    
 }

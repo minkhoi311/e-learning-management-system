@@ -11,6 +11,6 @@ import java.util.Map;
  * @author Acer
  */
 public interface StatsService {
-    Map<String, Object> getInstructorStats(String username);
     Map<String, Object> getAdminStats();
+    Map<String, Object> getInstructorStats(String username);
 }

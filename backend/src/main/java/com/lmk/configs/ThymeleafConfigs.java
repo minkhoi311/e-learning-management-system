@@ -28,7 +28,7 @@ public class ThymeleafConfigs {
         templateResolver.setCharacterEncoding("UTF-8");
         return templateResolver;
     }
-    // 1. KHAI BÁO BEAN SPRING SECURITY DIALECT
+
     @Bean
     public SpringSecurityDialect springSecurityDialect() {
         return new SpringSecurityDialect();
@@ -38,7 +38,7 @@ public class ThymeleafConfigs {
     public SpringTemplateEngine templateEngine() {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(templateResolver());
-        // 2. NHÚNG BỘ DỊCH SECURITY VÀO THYMELEAF ENGINE
+
         templateEngine.addDialect(springSecurityDialect());
         return templateEngine;
     }

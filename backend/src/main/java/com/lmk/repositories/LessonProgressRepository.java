@@ -12,5 +12,5 @@ import com.lmk.pojo.LessonProgress;
  */
 public interface LessonProgressRepository {
     Long countCompletedLessons(int enrollmentId);
-    void save(LessonProgress progress);
+    void saveProgress(LessonProgress progress);
 }

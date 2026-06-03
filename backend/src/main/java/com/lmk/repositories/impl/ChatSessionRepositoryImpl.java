@@ -34,8 +34,6 @@ public class ChatSessionRepositoryImpl implements ChatSessionRepository {
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<ChatSession> q = b.createQuery(ChatSession.class);
         Root<ChatSession> root = q.from(ChatSession.class);
-
-        // Truy vấn: SELECT c FROM ChatSession c WHERE c.firebaseRoom = :roomId
         q.select(root).where(b.equal(root.get("firebaseRoom"), roomId));
 
         Query<ChatSession> query = session.createQuery(q);
@@ -43,17 +41,13 @@ public class ChatSessionRepositoryImpl implements ChatSessionRepository {
     }
 
     @Override
-    public ChatSession saveOrUpdate(ChatSession chatSession) {
-        Session session = this.factory.getObject().getCurrentSession();
-        
-        // Sử dụng persist/merge chuẩn JPA thay cho save/update cũ
+    public void saveOrUpdate(ChatSession chatSession) {
+        Session session = this.factory.getObject().getCurrentSession();   
         if (chatSession.getId() != null) {
-            session.merge(chatSession); // Cập nhật
+            session.merge(chatSession);
         } else {
-            session.persist(chatSession); // Thêm mới
+            session.persist(chatSession);
         }
-        
-        return chatSession;
     }
 
     @Override
@@ -63,7 +57,6 @@ public class ChatSessionRepositoryImpl implements ChatSessionRepository {
         CriteriaQuery<ChatSession> q = b.createQuery(ChatSession.class);
         Root<ChatSession> root = q.from(ChatSession.class);
 
-        // Kiểm tra role để lọc đúng cột instructorId hoặc studentId
         if ("INSTRUCTOR".equals(user.getRole())) {
             q.select(root).where(b.equal(root.get("instructorId").get("id"), user.getId()));
         } else {

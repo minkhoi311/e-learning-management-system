@@ -48,16 +48,16 @@ public class UserRepositoryImpl implements UserRepository {
         if (params == null) {
             return predicates;
         }
+
         String kw = params.get("kw");
         if (kw != null && !kw.isEmpty()) {
-            String searchPattern = "%" + kw.toLowerCase().trim() + "%";
-            Predicate matchUsername = b.like(b.lower(root.get("username")), searchPattern);
-            Predicate matchEmail = b.like(b.lower(root.get("email")), searchPattern);
-            Predicate matchFirstName = b.like(b.lower(root.get("firstName")), searchPattern);
-            Predicate matchLastName = b.like(b.lower(root.get("lastName")), searchPattern);
-            Predicate matchFullName = b.like(b.lower(root.get("fullName")), searchPattern);
-
-            predicates.add(b.or(matchUsername, matchEmail, matchFirstName, matchLastName, matchFullName));
+            String pattern = "%" + kw.toLowerCase().trim() + "%";
+            predicates.add(b.or(
+                    b.like(b.lower(root.get("username")), pattern),
+                    b.like(b.lower(root.get("email")), pattern),
+                    b.like(b.lower(root.get("firstName")), pattern),
+                    b.like(b.lower(root.get("lastName")), pattern)
+            ));
         }
 
         String role = params.get("role");
@@ -75,36 +75,43 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getUsers(Map<String, String> params) {
-        Session session = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
         CriteriaQuery<User> q = b.createQuery(User.class);
         Root<User> root = q.from(User.class);
         q.select(root);
 
         List<Predicate> predicates = buildPredicates(b, root, params);
-        if (!predicates.isEmpty()) {
+        if (!predicates.isEmpty())
             q.where(predicates.toArray(Predicate[]::new));
-        }
 
         q.orderBy(b.desc(root.get("createdTime")));
 
-        Query<User> query = session.createQuery(q);
+        Query<User> query = s.createQuery(q);
 
         if (params != null && params.containsKey("page")) {
-            int pageSize = this.env.getProperty("users.page_size", Integer.class);
+            int pageSize = this.env.getProperty("users.page_size", Integer.class, 20);
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            int start = (page - 1) * pageSize;
-
+            query.setFirstResult((page - 1) * pageSize);
             query.setMaxResults(pageSize);
-            query.setFirstResult(start);
         }
+
         return query.getResultList();
     }
 
     @Override
     public Long countUsers(Map<String, String> params) {
-        Session session = this.factory.getObject().getCurrentSession();
-        return DaoUtils.count(session, User.class, (b, root) -> buildPredicates(b, root, params));
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<User> root = q.from(User.class);
+        q.select(b.count(root));
+
+        List<Predicate> predicates = buildPredicates(b, root, params);
+        if (!predicates.isEmpty())
+            q.where(predicates.toArray(Predicate[]::new));
+
+        return s.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -112,36 +119,39 @@ public class UserRepositoryImpl implements UserRepository {
         Session session = this.factory.getObject().getCurrentSession();
         return session.get(User.class, id);
     }
+    
+    @Override
+    public User getUserByUsername(String username) {
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
+        CriteriaQuery<User> q = b.createQuery(User.class);
+        Root<User> root = q.from(User.class);
+        q.select(root).where(b.equal(root.get("username"), username));
+        return s.createQuery(q).uniqueResult();
+    }
 
     @Override
     public List<User> getUsersByRole(String role) {
-        Session session = this.factory.getObject().getCurrentSession();
-
-        Query<User> q = session.createQuery("FROM User WHERE role = :role", User.class);
-        q.setParameter("role", role);
-        return q.getResultList();
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
+        CriteriaQuery<User> q = b.createQuery(User.class);
+        Root<User> root = q.from(User.class);
+        q.select(root).where(b.equal(root.get("role"), role));
+        return s.createQuery(q).getResultList();
     }
 
     @Override
-    public User addUser(User user) {
+    public void saveUser(User u) {
         Session session = this.factory.getObject().getCurrentSession();
-        session.persist(user);
-        return user;
+        if (u.getId() == null) 
+            session.persist(u);
+        else session.merge(u);
     }
-
+    
     @Override
-    public User updateUser(User user) {
-        Session session = this.factory.getObject().getCurrentSession();
-        return (User) session.merge(user);
-    }
+    public boolean authenticate(String username, String password) {
+        User u = this.getUserByUsername(username);
 
-    @Override
-    public User getUserByUsername(String username) {
-        Session session = this.factory.getObject().getCurrentSession();
-        Query q = session.createNamedQuery("User.findByUsername", User.class);
-        q.setParameter("username", username);
-
-        return (User) q.getSingleResult();
-
+        return this.passwordEncoder.matches(password, u.getPassword());
     }
 }

@@ -16,14 +16,12 @@ const ChangePassword = () => {
 
     const changePassword = async (e) => {
         e.preventDefault();
-        
-
         if (passwords.new_password !== passwords.confirm_password) {
             setMsg({ type: 'danger', text: 'Mật khẩu xác nhận KHÔNG khớp!' });
             return;
         }
-        if (passwords.new_password.length < 6) {
-            setMsg({ type: 'warning', text: 'Mật khẩu mới phải có ít nhất 6 ký tự!' });
+        if (passwords.new_password.length < 3) {
+            setMsg({ type: 'warning', text: 'Mật khẩu mới phải có ít nhất 3 ký tự!' });
             return;
         }
 
@@ -36,17 +34,16 @@ const ChangePassword = () => {
                 new_password: passwords.new_password
             });
             
-            setMsg({ type: 'success', text: res.data.message || 'Đổi mật khẩu thành công!' });
-            
-            setPasswords({ old_password: '', new_password: '', confirm_password: '' });
-            
-            setTimeout(() => nav('/profile'), 2000);
-            
+            if (res.status === 200) {
+                setMsg({ type: 'success', text: 'Đổi mật khẩu thành công!' });
+                setPasswords({ old_password: '', new_password: '', confirm_password: '' });
+                setTimeout(() => nav('/profile'), 2000);
+            }
         } catch (ex) {
             console.error(ex);
             setMsg({ 
                 type: 'danger', 
-                text: ex.response?.data?.message || 'Mật khẩu cũ không đúng!' 
+                text: 'Mật khẩu cũ không đúng hoặc có lỗi xảy ra!' 
             });
         } finally {
             setLoading(false);

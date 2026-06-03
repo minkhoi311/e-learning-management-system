@@ -46,19 +46,16 @@ public class CourseRepositoryImpl implements CourseRepository {
             predicates.add(b.equal(root.get("categoryId").as(Integer.class), cateId));
         }
 
-        // Lọc từ giá
         String fromPrice = params.get("fromPrice");
         if (fromPrice != null && !fromPrice.isEmpty()) {
             predicates.add(b.greaterThanOrEqualTo(root.get("price"), Double.parseDouble(fromPrice)));
         }
 
-        // Lọc đến giá
         String toPrice = params.get("toPrice");
         if (toPrice != null && !toPrice.isEmpty()) {
             predicates.add(b.lessThanOrEqualTo(root.get("price"), Double.parseDouble(toPrice)));
         }
 
-        // Lọc theo trạng thái (isActive)
         String active = params.get("isActive");
         if (active != null && !active.isEmpty()) {
             predicates.add(b.equal(root.get("isActive"), Boolean.parseBoolean(active)));
@@ -81,13 +78,11 @@ public class CourseRepositoryImpl implements CourseRepository {
         Root root = q.from(Course.class);
         q.select(root);
 
-        // Áp dụng bộ lọc
         List<Predicate> predicates = buildPredicates(b, root, params);
         if (!predicates.isEmpty()) {
             q.where(predicates.toArray(Predicate[]::new));
         }
 
-        // Sắp xếp
         if (params != null) {
             String sort = params.getOrDefault("sort", "newest");
             switch (sort) {
@@ -108,12 +103,27 @@ public class CourseRepositoryImpl implements CourseRepository {
             int pageSize = this.env.getProperty("courses.page_size", Integer.class);
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * pageSize;
-
             query.setMaxResults(pageSize);
             query.setFirstResult(start);
         }
         return query.getResultList();
 
+    }
+
+    @Override
+    public Long countCourses(Map<String, String> params) {
+        Session s = this.factory.getObject().getCurrentSession();
+        CriteriaBuilder b = s.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Course> root = q.from(Course.class);
+        q.select(b.count(root));
+
+        List<Predicate> predicates = buildPredicates(b, root, params);
+        if (!predicates.isEmpty()) {
+            q.where(predicates.toArray(Predicate[]::new));
+        }
+
+        return s.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -150,21 +160,12 @@ public class CourseRepositoryImpl implements CourseRepository {
     }
 
     @Override
-    public boolean deleteCourse(int id) {
-        Session session = this.factory.getObject().getCurrentSession();
-        Course course = session.get(Course.class, id);
-        if (course == null) {
-            return false;
+    public void deleteCourse(int id) {
+        Session s = this.factory.getObject().getCurrentSession();
+        Course c = s.get(Course.class, id);
+        if (c != null) {
+            s.remove(c);
         }
-        session.remove(course);
-        return true;
-    }
-
-    @Override
-    public Long countCourse(Map<String, String> params) {
-        Session session = this.factory.getObject().getCurrentSession();
-
-        return DaoUtils.count(session, Course.class, (b, root) -> buildPredicates(b, root, params));
     }
 
 }

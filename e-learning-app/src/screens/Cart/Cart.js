@@ -47,7 +47,6 @@ const Cart = () => {
             nav('/login?next=/cart');
             return;
         }
-
         if (Object.keys(cart).length === 0) {
             alert("Giỏ hàng đang trống!");
             return;
@@ -55,36 +54,29 @@ const Cart = () => {
 
         setLoading(true);
         try {
-            // LẶP QUA TỪNG KHÓA HỌC: GHI DANH -> THANH TOÁN -> CHUYỂN TRANG
             for (let c of Object.values(cart)) {
-                // 1. Ghi danh (Enroll)
                 let enrollRes = await authApis().post(endpoints['enroll'](c.id));
-                let newEnrollmentId = enrollRes.data.id;
+                
+                if (enrollRes.status === 201) {
+                    let newEnrollmentId = enrollRes.data.id;
+                    let payRes = await authApis().post(endpoints['pay'](newEnrollmentId), {
+                        "method": paymentMethod
+                    });
 
-                // 2. Thanh toán cho đúng ID vừa tạo
-                let payRes = await authApis().post(endpoints['pay'](newEnrollmentId), {
-                    "method": paymentMethod
-                });
-
-                // 3. Nếu là MoMo -> Nhận được link thì Xóa giỏ hàng và Chuyển trang NGAY LẬP TỨC
-                // (Trong đồ án này, ta giả định mỗi lần thanh toán MoMo chỉ cho 1 khóa học. 
-                // Nếu muốn thanh toán nhiều khóa một lúc, Backend của bạn phải hỗ trợ gộp Hóa đơn)
-                if (paymentMethod === "MOMO" && payRes.data.payment_url) {
-                    cookies.remove(cartCookieName, { path: '/' });
-                    cartDispatch({ type: 'PAID', payload: 0 });
-                    setCart({});
-                    
-                    window.location.href = payRes.data.payment_url;
-                    return; // NGẮT HÀM NGAY TẠI ĐÂY, không chạy tiếp nữa
+                    if (paymentMethod === "MOMO" && payRes.status === 200 && payRes.data.payment_url) {
+                        cookies.remove(cartCookieName, { path: '/' });
+                        cartDispatch({ type: 'PAID', payload: 0 });
+                        setCart({});
+                        window.location.href = payRes.data.payment_url;
+                        return; 
+                    }
                 }
             }
 
-            // 4. Nếu là Tiền mặt (CASH) -> Vòng lặp chạy xong hết các khóa học rồi mới báo thành công
             if (paymentMethod === "CASH") {
                 cookies.remove(cartCookieName, { path: '/' });
                 cartDispatch({ type: 'PAID', payload: 0 });
                 setCart({});
-                
                 alert("Đăng ký thành công! Vui lòng đến trung tâm thanh toán tiền mặt để kích hoạt khóa học.");
                 nav('/my-enrollments');
             }

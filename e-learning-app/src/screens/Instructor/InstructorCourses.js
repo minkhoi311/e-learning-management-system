@@ -36,10 +36,11 @@ const InstructorCourses = () => {
     const handleDelete = async (courseId, subject) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa khóa học "${subject}"? Thao tác này không thể hoàn tác.`)) {
             try {
-                // CHUẨN HÓA: Dùng endpoints đã khai báo
-                await authApis().delete(endpoints['delete-course'](courseId));
-                alert("Xóa khóa học thành công!");
-                loadInstructorCourses(); // Tải lại danh sách
+                let res = await authApis().delete(endpoints['delete-course'](courseId));
+                if (res.status === 204 || res.status === 200) {
+                    alert("Xóa khóa học thành công!");
+                    loadInstructorCourses(); 
+                }
             } catch (err) {
                 console.error(err);
                 alert("Xóa thất bại! Khóa học này có thể đã có sinh viên đăng ký học.");

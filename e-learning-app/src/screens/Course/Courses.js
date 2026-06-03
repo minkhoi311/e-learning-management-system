@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import cookies from 'react-cookies';
 import Apis, { endpoints } from '../../configs/Apis';
-import { MyCartContext, MyUserContext } from '../../configs/Contexts'; // CHÚ Ý: Đã import MyUserContext
+import { MyCartContext, MyUserContext } from '../../configs/Contexts'; 
 import MySpinner from '../../components/MySpinner';
 
 const Courses = () => {
@@ -18,52 +18,56 @@ const Courses = () => {
     const [searchParams] = useSearchParams();
     const nav = useNavigate();
     
-    // Lấy context của Giỏ hàng và User
     const [, cartDispatch] = useContext(MyCartContext);
-    const [user] = useContext(MyUserContext); // CHÚ Ý: Khai báo user từ Context
-
-    const loadCourses = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            let url = `${endpoints['courses']}?page=${page}`;
-            
-            let kw = searchParams.get('kw');
-            if (kw) url += `&kw=${kw}`;
-            
-            let cateId = searchParams.get('cateId');
-            if (cateId) url += `&cateId=${cateId}`;
-
-            let res = await Apis.get(url);
-            
-            setCourses(res.data.courses);
-            setTotalPages(res.data.totalPages);
-            
-        } catch (ex) {
-            console.error("Lỗi tải khóa học:", ex);
-            setError("Không thể tải danh sách khóa học. Vui lòng thử lại sau.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [user] = useContext(MyUserContext); 
 
     useEffect(() => {
+        setPage(1);
+        setCourses([]);
+    }, [searchParams.get('kw'), searchParams.get('cateId')]);
+
+    useEffect(() => {
+        const loadCourses = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                let url = `${endpoints['courses']}?page=${page}`;
+                
+                let kw = searchParams.get('kw');
+                if (kw) url += `&kw=${kw}`;
+                
+                let cateId = searchParams.get('cateId');
+                if (cateId) url += `&cateId=${cateId}`;
+
+                let res = await Apis.get(url);
+            
+                if (page === 1) {
+                    setCourses(res.data.courses);
+                } else {
+                    setCourses(current => [...current, ...res.data.courses]);
+                }
+                
+                setTotalPages(res.data.totalPages);
+                
+            } catch (ex) {
+                console.error("Lỗi tải khóa học:", ex);
+                setError("Không thể tải danh sách khóa học. Vui lòng thử lại sau.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         loadCourses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, searchParams]);
 
     const addToCart = (course) => {
-        // 1. Chặn nếu chưa đăng nhập
         if (!user) {
             alert("Vui lòng đăng nhập để thêm khóa học vào giỏ!");
             nav('/login?next=/courses');
             return;
         }
 
-        // 2. Xác định tên cookie riêng của user hiện tại
         const cartCookieName = `cart_${user.username}`;
-        
-        // 3. Lấy giỏ hiện tại lên
         let cart = cookies.load(cartCookieName) || {};
         
         if (course.id in cart) {
@@ -71,7 +75,6 @@ const Courses = () => {
             return;
         }
 
-        // 4. Thêm khóa học mới vào giỏ
         cart[course.id] = {
             id: course.id,
             subject: course.subject,
@@ -80,12 +83,8 @@ const Courses = () => {
             quantity: 1
         };
         
-        // 5. Lưu lại vào cookie CỦA USER ĐÓ
         cookies.save(cartCookieName, cart, { path: '/', maxAge: 7 * 24 * 60 * 60 });
-        
-        // 6. Cập nhật qua Reducer (BẮT BUỘC có payload là giỏ hàng mới)
         cartDispatch({ type: 'UPDATE', payload: cart });
-        
         alert("Đã thêm khóa học vào giỏ hàng thành công!");
     };
 
@@ -101,12 +100,6 @@ const Courses = () => {
             setCompareList([...compareList, course]);
         }
     };
-
-    if (loading && page === 1) return (
-        <Container className="text-center mt-5">
-            <MySpinner /> 
-        </Container>
-    );
 
     return (
         <Container className="mt-4 mb-5 pb-5"> 
@@ -179,17 +172,21 @@ const Courses = () => {
                 })}
             </Row>
 
+            {/* Nút Load More tải từ từ */}
             {page < totalPages && (
                 <div className="text-center mt-4">
                     <Button 
                         variant="outline-primary" 
+                        size="lg"
+                        className="px-5 rounded-pill"
                         onClick={() => setPage(page + 1)} 
                         disabled={loading}>
-                        {loading ? 'Đang tải...' : 'Xem thêm khóa học'}
+                        {loading ? <MySpinner /> : <span><i className="bi bi-arrow-down-circle me-2"></i> Xem thêm khóa học</span>}
                     </Button>
                 </div>
             )}
 
+            {/* Thanh menu so sánh dưới đáy */}
             {compareList.length > 0 && (
                 <div className="fixed-bottom bg-white border-top shadow-lg p-3 d-flex justify-content-between align-items-center" style={{ zIndex: 1000 }}>
                     <div className="d-flex align-items-center">

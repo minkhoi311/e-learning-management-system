@@ -29,7 +29,6 @@ import InstructorCourses from './screens/Instructor/InstructorCourses';
 import CourseForm from './screens/Instructor/CourseForm';
 import InstructorStudents from './screens/Instructor/InstructorStudents';
 
-
 // Placeholder (Còn lại phần Trang chủ và Giảng viên)
 const Home = () => <div className="container mt-4 text-center"><h2>Trang chủ</h2></div>;
 const Instructors = () => <div className="container mt-4 text-center"><h2>Giảng viên</h2></div>;

@@ -18,6 +18,6 @@ public interface UserRepository {
     User getUserById(int id);
     User getUserByUsername(String username);
     List<User> getUsersByRole(String role);
-    User addUser(User user);
-    User updateUser(User user);
+    void saveUser(User u);
+    boolean authenticate(String username, String password);
 }

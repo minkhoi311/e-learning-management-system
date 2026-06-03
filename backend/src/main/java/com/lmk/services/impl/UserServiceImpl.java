@@ -180,22 +180,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePassword(String username, String oldPassword, String newPassword) {
-        if (newPassword == null || newPassword.length() < 6) {
-            return false;
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        if (newPassword == null || newPassword.length() < 3) {
+            throw new IllegalArgumentException("Mật khẩu mới phải có tối thiểu 3 ký tự!");
         }
+        
         User u = this.userRepo.getUserByUsername(username);
         if (u == null) {
-            return false;
+            throw new UsernameNotFoundException("Người dùng không tồn tại trên hệ thống!");
         }
         if (!this.passwordEncoder.matches(oldPassword, u.getPassword())) {
-            return false;
+            throw new IllegalArgumentException("Mật khẩu cũ nhập vào không chính xác!");
         }
 
         u.setPassword(this.passwordEncoder.encode(newPassword));
         u.setUpdatedTime(new Date());
         this.userRepo.updateUser(u);
-        return true;
     }
 
     @Override

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { Badge, Button, Container, Form, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import Apis, { endpoints } from "../configs/Apis";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MyCartContext, MyUserContext } from "../configs/Contexts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +11,7 @@ const Header = () => {
     const [categories, setCategories] = useState([]);
     const [kw, setKw] = useState("");
     const nav = useNavigate();
+    const location = useLocation();
     
     const [user, dispatch] = useContext(MyUserContext);
     const [cartCounter, ] = useContext(MyCartContext) || [{ totalQuantity: 0 }];
@@ -28,9 +29,13 @@ const Header = () => {
     }
 
     useEffect(() => {
+            if (location.pathname.startsWith('/instructor')) {
+            return null; 
+        }
         loadCates();
     }, []);
     useEffect(() => {
+        
         if (user) {
             const cartCookieName = `cart_${user.username}`;
             let currentCart = cookies.load(cartCookieName) || {};
@@ -38,6 +43,7 @@ const Header = () => {
         } else {
             setCartQuantity(0);
         }
+        
     }, [user, cartCounter]); 
     
     const search = (e) => {

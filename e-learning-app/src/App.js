@@ -21,9 +21,13 @@ import Login from './screens/User/Login';
 import Register from './screens/User/Register';
 import Cart from './screens/Cart/Cart'; 
 import MyEnrollments from './screens/User/MyEnrollments'; 
-
+import InstructorDashboard from './screens/Instructor/InstructorDashboard';
 import Profile from './screens/User/Profile';
 import ChangePassword from './screens/User/ChangePassword';
+
+import InstructorCourses from './screens/Instructor/InstructorCourses';
+import CourseForm from './screens/Instructor/CourseForm';
+import InstructorStudents from './screens/Instructor/InstructorStudents';
 
 
 // Placeholder (Còn lại phần Trang chủ và Giảng viên)
@@ -59,7 +63,6 @@ const App = () => {
                 <BrowserRouter>
                     <div className="d-flex flex-column min-vh-100">
                         <Header />
-
                         <Routes>
                             <Route path="/" element={<Home />} />
                             
@@ -69,10 +72,15 @@ const App = () => {
                             <Route path="/lessons/:lessonId" element={<LessonDetail />} /> 
 
                             <Route path="/instructors" element={<Instructors />} />
+                            <Route path="/instructor/courses" element={<InstructorCourses />} />
+                            <Route path="/instructor/courses/add" element={<CourseForm />} />
+                            <Route path="/instructor/courses/edit/:courseId" element={<CourseForm />} />
+                            <Route path="/instructor/courses/:courseId/students" element={<InstructorStudents />} />
+
                             <Route path="/login" element={<Login />} /> 
                             <Route path="/register" element={<Register />} />
                             <Route path="/cart" element={<Cart />} />
-                            
+                            <Route path="/instructor" element={<InstructorDashboard />} />
                             <Route path="/my-enrollments" element={<MyEnrollments />} />
                             <Route path="/profile" element={<Profile />} />
                             <Route path="/change-password" element={<ChangePassword />} />

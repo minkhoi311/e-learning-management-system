@@ -23,7 +23,7 @@ public interface UserService  extends UserDetailsService{
     List<User> getUsersByRole(String role);
     User updateUser(User user);
     User updateCurrentUser(User u, String username);
-    boolean changePassword(String username, String oldPassword, String newPassword);
+    void changePassword(String username, String oldPassword, String newPassword);
     boolean unActiveUser(int id);
     boolean activeUser(int id);
     boolean approveInstructor(int id);

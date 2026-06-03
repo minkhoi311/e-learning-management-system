@@ -5,7 +5,7 @@
 package com.lmk.services.impl;
 
 import com.lmk.pojo.Category;
-import com.lmk.repository.CategoryRepository;
+import com.lmk.repositories.CategoryRepository;
 import com.lmk.services.CategoryService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

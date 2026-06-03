@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,7 +81,6 @@ public class ApiLessonController {
         return new ResponseEntity<>(this.commentService.getByLesson(lessonId), HttpStatus.OK);
     }
 
-    // @PreAuthorize("isAuthenticated()")
     @PostMapping("/secure/lessons/{lessonId}/comments")
     public ResponseEntity<Object> addComment(
             @PathVariable("lessonId") int lessonId,
@@ -118,8 +118,9 @@ public class ApiLessonController {
 
         return new ResponseEntity<>(Map.of("message", "Xóa bình luận thành công!"), HttpStatus.NO_CONTENT);
     }
-
-    @PostMapping("/courses/{courseId}/lessons")
+    
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @PostMapping("/secure/courses/{courseId}/lessons")
     public ResponseEntity<Object> createLesson(@PathVariable("courseId") int courseId,
             @ModelAttribute Lesson l) {
         // TODO: kiểm tra instructor có sở hữu course không khi có Security
@@ -131,9 +132,8 @@ public class ApiLessonController {
         return new ResponseEntity<>(l, HttpStatus.CREATED);
     }
 
-    // PUT /api/lessons/{id} — Instructor sửa bài học
-    // @PreAuthorize("hasRole('INSTRUCTOR')")
-    @PutMapping("/lessons/{lessonId}")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @PutMapping("/secure/lessons/{lessonId}")
     public ResponseEntity<Lesson> updateLesson(@PathVariable("lessonId") int lessonId,
             @ModelAttribute Lesson l) {
         // TODO: kiểm tra quyền sở hữu khi có Security
@@ -142,9 +142,8 @@ public class ApiLessonController {
         return new ResponseEntity<>(l, HttpStatus.OK);
     }
 
-    // DELETE /api/lessons/{id} — Instructor xóa bài học
-    // @PreAuthorize("hasRole('INSTRUCTOR')")
-    @DeleteMapping("/lessons/{lessonId}")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @DeleteMapping("/secure/lessons/{lessonId}")
     public ResponseEntity<Map<String, String>> deleteLesson(@PathVariable("lessonId") int lessonId) {
         // TODO: kiểm tra quyền sở hữu khi có Security
         this.lessonService.deleteLesson(lessonId);

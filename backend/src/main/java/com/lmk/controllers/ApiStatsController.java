@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +20,7 @@ public class ApiStatsController {
     @Autowired
     private StatsService statsService;
 
-    // GET /api/stats/overview — Instructor xem thống kê của mình
-    // @PreAuthorize("hasRole('INSTRUCTOR')")
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/secure/stats/overview")
     public ResponseEntity<Object> instructorStats(Principal principal) {
 
@@ -30,8 +30,7 @@ public class ApiStatsController {
         return new ResponseEntity<>(this.statsService.getInstructorStats(principal.getName()),HttpStatus.OK);
     }
 
-    // GET /api/stats/admin/overview — Admin xem báo cáo tổng thể
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/secure/stats/admin/overview")
     public ResponseEntity<Map<String, Object>> adminStats() {
         return new ResponseEntity<>(this.statsService.getAdminStats(),HttpStatus.OK);

@@ -172,30 +172,27 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public Enrollment updatePaymentMethod(int enrollmentId, String method) {
         Enrollment enrollment = this.enrollmentRepo.getById(enrollmentId);
+
         if (enrollment != null) {
             Payment p = enrollment.getPayment();
             if (p == null) {
                 p = new Payment();
-                p.setEnrollmentId(enrollment); 
+                p.setEnrollmentId(enrollment);
                 enrollment.setPayment(p);
             }
+
             p.setPaymentMethod(method);
             p.setAmount(enrollment.getCourseId().getPrice());
+
             if ("CASH".equalsIgnoreCase(method)) {
-                p.setStatus("SUCCESS"); 
+                p.setStatus("SUCCESS");
                 p.setPaidTime(new Date());
             } else {
-                p.setStatus("PENDING"); 
+                p.setStatus("PENDING");
+                p.setPaidTime(null);
             }
-            enrollment.setPayment(p);
 
-            this.enrollmentRepo.update(enrollment);
-            if (p.getPaidTime() == null) {
-                p.setPaidTime(new Date());
-            }
-            
-            Enrollment updatedEnrollment = this.enrollmentRepo.update(enrollment);
-            return updatedEnrollment;
+            return this.enrollmentRepo.update(enrollment);
         }
 
         return null;

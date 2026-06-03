@@ -5,7 +5,7 @@
 package com.lmk.repositories.impl;
 
 import com.lmk.pojo.Category;
-import com.lmk.repository.CategoryRepository;
+import com.lmk.repositories.CategoryRepository;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.query.Query;

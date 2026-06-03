@@ -13,7 +13,7 @@ const Profile = () => {
     const [msg, setMsg] = useState(null);
     const nav = useNavigate();
 
-    // Lấy thông tin mới nhất từ Backend
+
     useEffect(() => {
         const loadProfile = async () => {
             if (!userContext) {
@@ -34,7 +34,7 @@ const Profile = () => {
         loadProfile();
     }, [userContext, nav]);
 
-    // Xử lý cập nhật thông tin
+
     const saveProfile = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -47,7 +47,7 @@ const Profile = () => {
             form.append('email', profile.email);
             form.append('phone', profile.phone || '');
             
-            // Xử lý nếu có chọn ảnh mới
+
             if (avatarRef.current.files.length > 0) {
                 form.append('avatar', avatarRef.current.files[0]);
             }
@@ -83,7 +83,6 @@ const Profile = () => {
 
                     <Form onSubmit={saveProfile}>
                         <Row>
-                            {/* Cột hiển thị ảnh đại diện */}
                             <Col md={4} className="text-center mb-4">
                                 <Image 
                                     src={profile.avatar || 'https://via.placeholder.com/150'} 
@@ -98,7 +97,6 @@ const Profile = () => {
                                 </Form.Group>
                             </Col>
 
-                            {/* Cột thông tin form */}
                             <Col md={8}>
                                 <Row>
                                     <Col md={6}>

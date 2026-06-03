@@ -10,7 +10,6 @@ const MyEnrollments = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // ĐÃ ĐỔI TÊN: Dùng tên chung cho tất cả các cổng thanh toán sau này
     const [paymentMsg, setPaymentMsg] = useState(null); 
 
     const [user] = useContext(MyUserContext);
@@ -68,7 +67,7 @@ const MyEnrollments = () => {
                 Khóa học của tôi
             </h2>
 
-            {/* Hiển thị thông báo thanh toán tổng quát */}
+    
             {paymentMsg && (
                 <Alert variant={paymentMsg.type} className="fw-bold shadow-sm" onClose={() => setPaymentMsg(null)} dismissible>
                     {paymentMsg.text}
@@ -92,7 +91,6 @@ const MyEnrollments = () => {
                 {enrollments.map(e => {
                     if (!e || !e.courseId) return null; 
                     
-                    // Khai báo an toàn thông tin hóa đơn từ bảng Payment đi kèm sang
                     const paymentInfo = e.payment; 
 
                     return (

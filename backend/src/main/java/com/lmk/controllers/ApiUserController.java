@@ -14,16 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,21 +39,15 @@ public class ApiUserController {
     @Autowired
     private UserService userService;
 
-    //tao user
-    @PostMapping(path = "/users",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> create(@RequestParam Map<String, String> params,
+    @PostMapping(path = "/users")
+    public ResponseEntity<User> create(@RequestParam Map<String, String> info,
             @RequestParam(value = "avatar") MultipartFile avatar) {
-        User u = this.userService.addUser(params, avatar);
-
+        User u = this.userService.addUser(info, avatar);
         return new ResponseEntity<>(u, HttpStatus.CREATED);
     }
 
-    //login
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User u) {
-
         if (this.userService.authenticate(u.getUsername(), u.getPassword())) {
             try {
                 String token = JwtUtils.generateToken(u.getUsername());
@@ -65,59 +59,26 @@ public class ApiUserController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai thông tin đăng nhập");
     }
 
-    //Lay thong tin user
     @RequestMapping("/secure/profile")
-    @ResponseBody
+    @ResponseBody //Trả dữ liệu trực tiếp vào HTTP response
     public ResponseEntity<User> getProfile(Principal principal) {
-        if (principal == null) 
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        User u = this.userService.getUserByUsername(principal.getName());
-        if (u == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        u.setPassword(null);
-        return new ResponseEntity<>(u, HttpStatus.OK);
+        return new ResponseEntity<>(this.userService.getUserByUsername(principal.getName()), HttpStatus.OK);
     }
 
-    @PostMapping("/secure/profile")
+    @PatchMapping("/secure/profile")
     public ResponseEntity<Object> updateCurrentUser(@ModelAttribute User u, Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"), HttpStatus.UNAUTHORIZED);
-        }
-
-        User updated = this.userService.updateCurrentUser(u, principal.getName());
-
-        if (updated == null) {
-            return new ResponseEntity<>(Map.of("message", "Cập nhật thất bại!"), HttpStatus.BAD_REQUEST);
-        }
-
-        updated.setPassword(null);
-
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+        return new ResponseEntity<>(this.userService.updateCurrentUser(u, principal.getName()), HttpStatus.OK);
     }
 
     @PostMapping("/secure/change-password")
-    public ResponseEntity<Map<String, String>> changePassword(@RequestBody Map<String, String> body, Principal principal) {
-
-        if (principal == null) {
-            return new ResponseEntity<>(Map.of("message", "Chưa đăng nhập!"), HttpStatus.UNAUTHORIZED);
-        }
-
-        boolean ok = this.userService.changePassword(
-                principal.getName(),
-                body.get("old_password"),
-                body.get("new_password"));
-        if (!ok) {
-            return new ResponseEntity<>(
-                    Map.of("message", "Mật khẩu cũ không đúng hoặc mật khẩu mới quá ngắn (tối thiểu 6 ký tự)!"),
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-        return new ResponseEntity<>(
-                Map.of("message", "Đổi mật khẩu thành công!"),
-                HttpStatus.OK
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public void changePassword(@RequestBody Map<String, String> body, Principal principal) {
+        String oldPassword = body.get("old_password");
+        String newPassword = body.get("new_password");
+        this.userService.changePassword(principal.getName(), oldPassword, newPassword);
     }
-
+    
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/secure/users/approve")
     public ResponseEntity<Object> approveInstructor(@RequestBody Map<String, Object> payload) {
         try {

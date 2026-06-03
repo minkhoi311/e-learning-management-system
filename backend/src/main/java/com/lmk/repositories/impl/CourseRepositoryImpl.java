@@ -64,6 +64,12 @@ public class CourseRepositoryImpl implements CourseRepository {
             predicates.add(b.equal(root.get("isActive"), Boolean.parseBoolean(active)));
         }
 
+        String username = params.get("username");
+        if (username != null && !username.isEmpty()) {
+            Predicate pUsername = b.equal(root.get("instructorId").get("username"), username);
+            predicates.add(pUsername);
+        }
+
         return predicates;
     }
 
@@ -115,7 +121,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         Session session = this.factory.getObject().getCurrentSession();
         return session.get(Course.class, id);
     }
-    
+
     @Override
     public List<Course> getCoursesByIds(List<Integer> ids) {
         Session session = this.factory.getObject().getCurrentSession();
@@ -127,12 +133,11 @@ public class CourseRepositoryImpl implements CourseRepository {
         q.select(root);
 
         q.where(root.get("id").in(ids));
-        
+
         Query<Course> query = session.createQuery(q);
 
         return query.getResultList();
     }
-    
 
     @Override
     public void addOrUpdateCourse(Course c) {
@@ -161,5 +166,5 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         return DaoUtils.count(session, Course.class, (b, root) -> buildPredicates(b, root, params));
     }
-    
+
 }

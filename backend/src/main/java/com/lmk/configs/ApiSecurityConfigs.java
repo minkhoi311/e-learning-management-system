@@ -6,6 +6,7 @@ package com.lmk.configs;
 
 import com.lmk.filters.JwtFilter;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -24,6 +25,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @Order(1)
 public class ApiSecurityConfigs {
+    @Autowired
+    private JwtFilter jwtFilter;
+    
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 
@@ -34,7 +38,7 @@ public class ApiSecurityConfigs {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/secure/**").authenticated()
                     .anyRequest().permitAll()
-            ).addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+            ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -44,7 +48,7 @@ public class ApiSecurityConfigs {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of("http://localhost:3000")); 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true); 

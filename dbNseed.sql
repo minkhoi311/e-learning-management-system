@@ -114,6 +114,17 @@ CREATE TABLE payment (
     CONSTRAINT fk_payment_enrollment FOREIGN KEY (enrollment_id) REFERENCES enrollment(id) ON DELETE CASCADE
 );
 
+CREATE TABLE chat_session (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    firebase_room VARCHAR(100) NOT NULL UNIQUE,
+    student_id INT NOT NULL,
+    instructor_id INT NOT NULL,
+    CONSTRAINT fk_chatsession_student FOREIGN KEY (student_id) REFERENCES user(id) ON DELETE CASCADE,
+    CONSTRAINT fk_chatsession_instructor FOREIGN KEY (instructor_id) REFERENCES user(id) ON DELETE CASCADE,
+    -- (Tùy chọn) Đảm bảo một cặp Học viên - Giảng viên chỉ có 1 phòng chat duy nhất
+    CONSTRAINT uq_student_instructor_chat UNIQUE (student_id, instructor_id) 
+);
+
 -- ========================================================
 -- PHẦN 2: CHÈN DỮ LIỆU MẪU
 -- ========================================================

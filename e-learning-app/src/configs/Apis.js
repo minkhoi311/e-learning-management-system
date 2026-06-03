@@ -9,9 +9,15 @@ export const endpoints = {
     
     // Lessons & Comments
     'lessons': (courseId) => `/courses/${courseId}/lessons`,
-    'lesson-details': (lessonId) => `/lessons/${lessonId}`, // <-- ĐÃ THÊM DÒNG NÀY
+    'lesson-details': (lessonId) => `/lessons/${lessonId}`,
     'comments': (lessonId) => `/lessons/${lessonId}/comments`,
     'addComment': (lessonId) => `/secure/lessons/${lessonId}/comments`,
+
+    // Instructor - Quản lý khóa học
+    'add-course': '/secure/courses',                                  // <-- MỚI THÊM
+    'update-course': (courseId) => `/secure/courses/${courseId}`,     // <-- MỚI THÊM
+    'delete-course': (courseId) => `/secure/courses/${courseId}`,     // <-- MỚI THÊM
+    'instructor-students': (courseId) => `/secure/instructor/courses/${courseId}/students`,
     
     // Auth & User
     'register': '/users',
@@ -28,6 +34,8 @@ export const endpoints = {
     
     // Stats
     'instructor-stats': '/secure/stats/overview',
+
+    'get-chat-room': '/secure/chat/room',
 }
 
 export const authApis = () => {

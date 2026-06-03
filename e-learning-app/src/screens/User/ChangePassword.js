@@ -17,7 +17,7 @@ const ChangePassword = () => {
     const changePassword = async (e) => {
         e.preventDefault();
         
-        // Frontend Validation
+
         if (passwords.new_password !== passwords.confirm_password) {
             setMsg({ type: 'danger', text: 'Mật khẩu xác nhận KHÔNG khớp!' });
             return;
@@ -31,7 +31,6 @@ const ChangePassword = () => {
         setMsg(null);
         
         try {
-            // Gửi dữ liệu dưới dạng JSON như backend yêu cầu
             let res = await authApis().post(endpoints['change-password'], {
                 old_password: passwords.old_password,
                 new_password: passwords.new_password

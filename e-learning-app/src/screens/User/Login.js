@@ -37,23 +37,26 @@ const Login = () => {
             try {
                 setLoading(true);
                 
-                // 1. Gọi API lấy Token
                 let res = await Apis.post(endpoints['login'], {...user});
                 cookies.save('token', res.data.token, { path: '/' });
                 
-                // 2. Dùng Token để lấy thông tin User hiện tại (Sửa lại endpoint thành profile)
                 let u = await authApis().get(endpoints['profile']);
                 
-                // 3. Lưu thông tin user vào Cookie để F5 không bị mất
                 cookies.save('user', u.data, { path: '/' });
                 
-                // 4. Cập nhật Context toàn cục
+
                 dispatch({"type": "LOGIN", "payload": u.data});
 
-                // 5. Chuyển hướng
+
                 let next = q.get('next');
-                if (next) nav(next);
-                else nav('/');
+                
+                if (next) {
+                    nav(next); 
+                } else if (u.data.role === 'INSTRUCTOR') {
+                    nav('/instructor'); 
+                } else {
+                    nav('/');
+                }
 
             } catch (ex) {
                 console.error(ex);
@@ -64,7 +67,7 @@ const Login = () => {
         }
     }
 
-    // Hàm giả lập chờ tích hợp API Google
+
     const handleGoogleLogin = () => {
         alert("Đang chuẩn bị gọi API Google OAuth2...");
     };
@@ -111,7 +114,6 @@ const Login = () => {
                         <hr className="flex-grow-1 text-muted" />
                     </div>
 
-                    {/* Nút Đăng nhập bằng Google */}
                     <div className="d-grid">
                         <Button variant="outline-danger" onClick={handleGoogleLogin} className="d-flex align-items-center justify-content-center">
                             <i className="bi bi-google me-2"></i> Tiếp tục với Google

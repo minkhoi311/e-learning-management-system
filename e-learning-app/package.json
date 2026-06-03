@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.16.1",
     "bootstrap": "^5.3.8",
+    "firebase": "^12.14.0",
     "react": "^19.2.6",
     "react-bootstrap": "^2.10.10",
     "react-cookies": "^0.1.1",

@@ -4,14 +4,16 @@
  */
 package com.lmk.repositories;
 
-import com.lmk.pojo.Category;
+import com.lmk.pojo.ChatSession;
+import com.lmk.pojo.User;
 import java.util.List;
 
 /**
  *
- * @author admin
+ * @author Acer
  */
-public interface CategoryRepository {
-    List<Category> getCates();
-    Category getCateById(int id);
+public interface ChatSessionRepository {
+    ChatSession getByRoomId(String roomId);
+    ChatSession saveOrUpdate(ChatSession chatSession);
+    List<ChatSession> getSessionsByUser(User user);
 }

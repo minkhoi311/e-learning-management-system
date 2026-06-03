@@ -11,5 +11,6 @@
     <class>com.lmk.pojo.Enrollment</class>
     <class>com.lmk.pojo.LessonProgress</class>
     <class>com.lmk.pojo.User</class>
+    <class>com.lmk.pojo.ChatSession</class>
   </persistence-unit>
 </persistence>

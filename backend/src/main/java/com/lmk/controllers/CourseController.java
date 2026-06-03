@@ -5,7 +5,6 @@
 package com.lmk.controllers;
 
 import com.lmk.pojo.Course;
-import com.lmk.repositories.CourseRepository;
 import com.lmk.services.CategoryService;
 import com.lmk.services.CourseService;
 import com.lmk.services.UserService;
@@ -61,7 +60,7 @@ public class CourseController {
         Long totalItems = courseService.countCourse(params);
         
         // Lấy số mục trên mỗi trang từ cấu hình (Mặc định là 6 nếu không tìm thấy)
-        int pageSize = Integer.parseInt(env.getProperty("courses.page_size", "6"));
+        int pageSize = Integer.parseInt(env.getProperty("courses.page_size", "20"));
 
         // Tính tổng số trang bằng Utils
         int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);

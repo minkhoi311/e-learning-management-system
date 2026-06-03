@@ -16,6 +16,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,8 +62,7 @@ public class ApiEnrollmentController {
         return new ResponseEntity<>(Map.of("message", "Chưa đăng ký khóa học này!"), HttpStatus.NOT_FOUND);
     }
 
-    // POST /api/courses/{courseId}/enroll — Student ghi danh
-    // @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/secure/courses/{courseId}/enroll")
     public ResponseEntity<Object> enroll(@PathVariable("courseId") int courseId, Principal principal) {
         if (principal == null) {
@@ -93,6 +93,7 @@ public class ApiEnrollmentController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/secure/enrollments/{enrollmentId}/pay")
     public ResponseEntity<Map<String, Object>> processPayment(
             @PathVariable("enrollmentId") int enrollmentId,
@@ -149,7 +150,7 @@ public class ApiEnrollmentController {
         return new ResponseEntity<>(Map.of("message", "OK"), HttpStatus.OK);
     }
     
-    
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/secure/instructor/courses/{courseId}/students")
     public ResponseEntity<Object> getStudentsByCourse(@PathVariable("courseId") int courseId, Principal principal) {
         if (principal == null) {

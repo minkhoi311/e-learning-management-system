@@ -5,7 +5,6 @@ import MySpinner from "../../components/MySpinner";
 import Apis, { endpoints } from "../../configs/Apis";
 
 const Register = () => {
-    // Sắp xếp lại thứ tự mảng để tiện render theo lưới
     const userInfo = [
         { field: "lastName", title: "Họ và chữ lót", type: "text" },
         { field: "firstName", title: "Tên", type: "text" },
@@ -96,8 +95,6 @@ const Register = () => {
                     <Form onSubmit={register}>
                         <Row>
                             {userInfo.map((u, index) => (
-                                // Phân bổ cột: Username, Password, Confirm chiếm nửa dòng (md=6)
-                                // Trừ trường Username nếu muốn nó chiếm nguyên dòng thì để md=12
                                 <Col md={(u.field === 'username') ? 12 : 6} key={u.field}>
                                     <Form.Group className="mb-3" controlId={u.field}>
                                         <Form.Label className="fw-bold small">{u.title} <span className="text-danger">*</span></Form.Label>

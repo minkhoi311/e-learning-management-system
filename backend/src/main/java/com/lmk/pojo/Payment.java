@@ -21,7 +21,6 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -50,7 +49,7 @@ public class Payment implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "amount")
-    private BigDecimal amount;
+    private Double amount;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 7)
@@ -77,7 +76,7 @@ public class Payment implements Serializable {
         this.id = id;
     }
 
-    public Payment(Integer id, BigDecimal amount, String paymentMethod) {
+    public Payment(Integer id, Double amount, String paymentMethod) {
         this.id = id;
         this.amount = amount;
         this.paymentMethod = paymentMethod;
@@ -91,13 +90,9 @@ public class Payment implements Serializable {
         this.id = id;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+    public Double getAmount() { return amount; }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
+    public void setAmount(Double amount) { this.amount = amount; }
 
     public String getPaymentMethod() {
         return paymentMethod;

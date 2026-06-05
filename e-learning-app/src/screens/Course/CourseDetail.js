@@ -3,7 +3,6 @@ import { Container, Row, Col, Card, Button, Alert, ListGroup, Badge } from 'reac
 import { useParams, useNavigate } from 'react-router-dom';
 import cookies from 'react-cookies';
 import Apis, { endpoints } from '../../configs/Apis';
-import { MyCartContext } from '../../configs/Contexts';
 import MySpinner from '../../components/MySpinner';
 
 const CourseDetail = () => {
@@ -14,7 +13,6 @@ const CourseDetail = () => {
 
     const { courseId } = useParams(); 
     const nav = useNavigate();
-    const [, cartDispatch] = useContext(MyCartContext);
 
     useEffect(() => {
         const loadCourseDetails = async () => {
@@ -38,46 +36,10 @@ const CourseDetail = () => {
         }
     }, [courseId]);
 
-    const addToCart = () => {
-        if (!course) return;
-
-        let cart = cookies.load('cart') || {};
-        if (course.id in cart) {
-            alert("Khóa học này đã có trong giỏ hàng!");
-            return;
-        }
-
-        cart[course.id] = {
-            id: course.id,
-            subject: course.subject,
-            price: course.price,
-            image: course.image,
-            quantity: 1
-        };
-
-        cookies.save('cart', cart, { path: '/', maxAge: 7 * 24 * 60 * 60 });
-        cartDispatch({ type: 'UPDATE' });
-        alert("Đã thêm khóa học vào giỏ hàng thành công!");
-    };
-
     if (loading) return <Container className="text-center mt-5"><MySpinner /></Container>;
-
-    if (error || !course) {
-        return (
-            <Container className="mt-5">
-                <Alert variant="danger" className="text-center">
-                    <h4>{error || "Khóa học không tồn tại!"}</h4>
-                    <Button variant="primary" className="mt-3" onClick={() => nav('/courses')}>
-                        Quay lại danh sách
-                    </Button>
-                </Alert>
-            </Container>
-        );
-    }
 
     return (
         <Container className="mt-4 mb-5">
-            {/* 1. Phần Thông tin Khóa học (Giữ nguyên) */}
             <Card className="shadow-sm border-0 mb-5">
                 <Row className="g-0">
                     <Col md={5}>
@@ -108,14 +70,6 @@ const CourseDetail = () => {
                                 <h3 className="text-success mb-0 fw-bold">
                                     {course.price === 0 ? "MIỄN PHÍ" : `${course.price.toLocaleString("vi-VN")} VNĐ`}
                                 </h3>
-                                <div className="d-flex gap-2">
-                                    <Button variant="outline-secondary" onClick={() => nav('/courses')}>
-                                        Trở về
-                                    </Button>
-                                    <Button variant="primary" size="lg" onClick={addToCart}>
-                                        <i className="bi bi-cart-plus me-2"></i>Thêm vào giỏ
-                                    </Button>
-                                </div>
                             </div>
                         </Card.Body>
                     </Col>

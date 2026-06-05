@@ -10,7 +10,7 @@ const CourseForm = () => {
     const isEditMode = !!courseId;
     
     const [courseData, setCourseData] = useState({
-        subject: '', description: '', price: 0, duration: '', videoUrl: '', categoryId: ''
+        subject: '', description: '', price: 0, durationHours: '', videoUrl: '', categoryId: ''
     });
     const [categories, setCategories] = useState([]);
     const [imageFile, setImageFile] = useState(null);
@@ -40,7 +40,7 @@ const CourseForm = () => {
                         subject: res.data.subject || '',
                         description: res.data.description || '',
                         price: res.data.price || 0,
-                        duration: res.data.duration || '',
+                        durationHours: res.data.durationHours || '',
                         videoUrl: res.data.videoUrl || '',
                         categoryId: res.data.categoryId?.id || ''
                     });
@@ -59,16 +59,15 @@ const CourseForm = () => {
         setLoading(true);
         setError(null);
 
-        // Chuẩn hóa dữ liệu gửi đi dạng Multipart/Form-Data cho phù hợp cấu hình Cloudinary Backend
         const formData = new FormData();
         formData.append("subject", courseData.subject);
         formData.append("description", courseData.description);
         formData.append("price", courseData.price);
-        formData.append("duration", courseData.duration);
+        formData.append("durationHours", courseData.durationHours);
         formData.append("videoUrl", courseData.videoUrl);
         formData.append("categoryId", courseData.categoryId);
         if (imageFile) {
-            formData.append("file", imageFile); // Bắn file ảnh nháp lên
+            formData.append("file", imageFile);
         }
 
         try {
@@ -128,7 +127,7 @@ const CourseForm = () => {
                             <Col md={6}>
                                 <Form.Group>
                                     <Form.Label className="fw-bold small">Thời lượng giảng dạy (Giờ) *</Form.Label>
-                                    <Form.Control type="number" min="1" required value={courseData.duration} onChange={e => setCourseData({...courseData, duration: e.target.value})} placeholder="Ví dụ: 45" />
+                                    <Form.Control type="number" min="1" required value={courseData.durationHours} onChange={e => setCourseData({...courseData, durationHours: e.target.value})} placeholder="Ví dụ: 45" />
                                 </Form.Group>
                             </Col>
                         </Row>

@@ -4,16 +4,20 @@
  */
 package com.lmk.repositories;
 import java.util.List;
+import java.util.Map;
 /**
  *
  * @author Acer
  */
 public interface StatsRepository {
-Long countAllCourses();
+        Long countAllCourses();
         Long countAllEnrollments();
         Double sumSuccessPayments();
         List<Object[]> countUsersByRole();
         Long countCoursesByInstructor(int instructorId);
         Long countEnrollmentsByInstructor(int instructorId);
         List<Object[]> getRevenuePerCourseByInstructor(int instructorId);
+        
+        
+        List<Object[]> getMonthlyRevenue(int year);
 }

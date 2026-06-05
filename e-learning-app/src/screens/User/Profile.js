@@ -48,10 +48,9 @@ const Profile = () => {
             form.append('phone', profile.phone || '');
             
             if (avatarRef.current.files.length > 0) {
-                form.append('avatar', avatarRef.current.files[0]);
+                form.append('file', avatarRef.current.files[0]);
             }
 
-            // SỬ DỤNG PATCH VÌ BACKEND CHỈ HỖ TRỢ PATCH
             let res = await authApis().patch(endpoints['profile'], form, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });

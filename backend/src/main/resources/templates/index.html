@@ -27,48 +27,13 @@
                 Xin chào, <span th:text="${currentUser != null ? currentUser.firstName : 'Khách'}"></span>!
             </h1>
 
-            <p class="lead text-muted text-uppercase mt-2" style="letter-spacing: 1px;">
-                <th:block th:if="${currentUser != null}">
-                    <span th:if="${currentUser.role == 'ADMIN'}">QUẢN TRỊ VIÊN HỆ THỐNG</span>
-                    <span th:if="${currentUser.role == 'INSTRUCTOR'}">GIẢNG VIÊN</span>
-                    <span th:if="${currentUser.role == 'STUDENT'}">HỌC VIÊN</span>
-                </th:block>
+            <p class="lead text-muted text-uppercase mt-2" style="letter-spacing: 1px;">QUẢN TRỊ VIÊN HỆ THỐNG
             </p>
 
             <hr class="my-4 mx-auto" style="width: 100px; border-top: 3px solid #FF6B4A; opacity: 1;">
 
             <p class="text-muted mb-5">Chào mừng bạn quay trở lại hệ thống E-Learning.</p>
 
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                
-                <th:block th:if="${currentUser != null and currentUser.role == 'ADMIN'}">
-                    <a th:href="@{/admin/stats}" class="btn text-white btn-lg px-4 rounded-pill shadow-sm" style="background-color: #FF6B4A; border-color: #FF6B4A;">
-                        <i class="fa fa-bar-chart me-2"></i> Xem báo cáo
-                    </a>
-                    <a th:href="@{/admin/users}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
-                        <i class="fa fa-users me-2"></i> Quản lý người dùng
-                    </a>
-                </th:block>
-
-                <th:block th:if="${currentUser != null and currentUser.role == 'INSTRUCTOR'}">
-                    <a th:href="@{/instructor/courses}" class="btn text-white btn-lg px-4 rounded-pill shadow-sm" style="background-color: #FF6B4A; border-color: #FF6B4A;">
-                        <i class="fa fa-book me-2"></i> Quản lý Khóa học
-                    </a>
-                    <a th:href="@{/instructor/students}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
-                        <i class="fa fa-users me-2"></i> Tiến độ Học viên
-                    </a>
-                </th:block>
-
-                <th:block th:if="${currentUser != null and currentUser.role == 'STUDENT'}">
-                    <a th:href="@{/courses}" class="btn text-white btn-lg px-4 rounded-pill shadow-sm" style="background-color: #FF6B4A; border-color: #FF6B4A;">
-                        <i class="fa fa-search me-2"></i> Tìm Khóa học mới
-                    </a>
-                    <a th:href="@{/my-enrollments}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
-                        <i class="fa fa-play-circle me-2"></i> Vào phòng học
-                    </a>
-                </th:block>
-
-            </div>
         </div>
     </div>
 

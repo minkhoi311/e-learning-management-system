@@ -3,7 +3,6 @@ import { Container, Table, ProgressBar, Alert, Badge, Image, Button } from 'reac
 import { useParams, useNavigate } from 'react-router-dom';
 import { authApis, endpoints } from '../../configs/Apis';
 import MySpinner from '../../components/MySpinner';
-import ChatModal from '../../components/ChatModal';
 
 const InstructorStudents = () => {
     const { courseId } = useParams();
@@ -11,10 +10,6 @@ const InstructorStudents = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const nav = useNavigate();
-
-    const [showChat, setShowChat] = useState(false);
-    const [currentRoomId, setCurrentRoomId] = useState(null);
-    const [chatTargetName, setChatTargetName] = useState("");
 
     useEffect(() => {
         const loadStudentsProgress = async () => {
@@ -32,23 +27,6 @@ const InstructorStudents = () => {
 
         loadStudentsProgress();
     }, [courseId]);
-
-    const openChat = async (studentId, studentUsername) => {
-        try {
-            // Gọi Spring Boot để tạo/lấy mã phòng (vd: room_2_5)
-            let res = await authApis().post(endpoints['get-chat-room'], {
-                target_id: studentId
-            });
-            
-            // Lấy được mã phòng thì mở Popup Firebase
-            setCurrentRoomId(res.data.firebase_room);
-            setChatTargetName(studentUsername);
-            setShowChat(true);
-        } catch (err) {
-            alert("Lỗi không thể tạo phòng chat lúc này!");
-            console.error(err);
-        }
-    };
 
     if (loading) return <Container className="mt-5 text-center"><MySpinner /></Container>;
 
@@ -77,7 +55,6 @@ const InstructorStudents = () => {
                                 <th width="20%">Ngày tham gia</th>
                                 <th width="30%">Tiến độ bài học</th>
                                 <th width="15%">Hóa đơn</th>
-                                <th width="10%">Liên hệ</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -104,29 +81,12 @@ const InstructorStudents = () => {
                                             <Badge bg="warning" text="dark">Đang chờ duyệt</Badge>
                                         )}
                                     </td>
-                                    <td>
-                                    {/* 🔥 Nút bấm để Chat */}
-                                    <Button 
-                                        variant="outline-primary" 
-                                        size="sm" 
-                                        className="rounded-circle"
-                                        onClick={() => openChat(e.studentId.id, e.studentId.username)}
-                                    >
-                                        <i className="bi bi-chat-dots"></i>
-                                    </Button>
-                                </td>
                                 </tr>
                             ))}
                         </tbody>
                     </Table>
                 </div>
             )}
-            <ChatModal 
-                show={showChat} 
-                handleClose={() => setShowChat(false)} 
-                roomId={currentRoomId} 
-                targetName={chatTargetName} 
-            />
         </Container>
     );
 };

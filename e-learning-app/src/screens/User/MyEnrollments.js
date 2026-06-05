@@ -9,7 +9,6 @@ const MyEnrollments = () => {
     const [enrollments, setEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
     const [paymentMsg, setPaymentMsg] = useState(null); 
 
     const [user] = useContext(MyUserContext);
@@ -27,7 +26,7 @@ const MyEnrollments = () => {
         try {
             let res = await authApis().get(endpoints['my-enrollments']);
             
-            // NOTE: Chỉ lọc ra và giữ lại những khóa học ĐÃ THANH TOÁN THÀNH CÔNG
+            // Giữ lại những khóa học ĐÃ THANH TOÁN THÀNH CÔNG
             const successfulEnrollments = Array.isArray(res.data) 
                 ? res.data.filter(e => e.payment && e.payment.status === 'SUCCESS')
                 : [];
@@ -64,6 +63,36 @@ const MyEnrollments = () => {
         fetchEnrollments();
     }, [fetchEnrollments, searchParams]);
 
+    // ========================================================
+    // HÀM XỬ LÝ KHỞI TẠO HOẶC MỞ PHÒNG CHAT VỚI GIẢNG VIÊN
+    // ========================================================
+    const startChatWithInstructor = async (instructor) => {
+        if (!instructor || !instructor.id) {
+            alert("Không tìm thấy thông tin giảng viên!");
+            return;
+        }
+
+        try {
+            // Gọi API Backend để lấy/tạo phòng chat
+            let res = await authApis().post(endpoints['get-chat-room'], {
+                "target_id": instructor.id
+            });
+
+            if (res.status === 200 && res.data) {
+                // Chuyển hướng sang giao diện ChatRoom kèm theo dữ liệu phòng
+                nav('/chat', {
+                    state: {
+                        roomId: res.data.firebaseRoom,
+                        targetName: `GV. ${instructor.lastName} ${instructor.firstName}`
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("Lỗi khi tạo phòng chat:", err);
+            alert("Không thể kết nối đến hộp thoại của giảng viên lúc này!");
+        }
+    };
+
     if (loading) return <Container className="text-center mt-5"><MySpinner /></Container>;
 
     return (
@@ -81,7 +110,6 @@ const MyEnrollments = () => {
 
             {error && <Alert variant="danger">{error}</Alert>}
 
-            {/* NOTE: Nếu mảng rỗng (kể cả do đã lọc hết các khóa chưa thanh toán) thì hiện thông báo */}
             {!loading && enrollments.length === 0 && !error && (
                 <Alert variant="info" className="text-center p-5 shadow-sm">
                     <i className="bi bi-journal-x display-1 text-muted mb-3"></i>
@@ -100,7 +128,6 @@ const MyEnrollments = () => {
                     return (
                         <Col key={e.id} xs={12} sm={6} md={4} lg={3}>
                             <Card className="h-100 hover-lift shadow-sm border-0">
-                                
                                 <Link to={`/courses/${e.courseId.id}`} style={{ textDecoration: 'none' }}>
                                     <Card.Img 
                                         variant="top" 
@@ -119,7 +146,7 @@ const MyEnrollments = () => {
                                     <div className="mt-2 mb-2 flex-grow-1">
                                         <div className="d-flex justify-content-between mb-1 small text-muted">
                                             <span>Tiến độ học</span>
-                                            <span className="fw-bold text-success">{e.progressPercent || 0}%</span>
+                                            <span className="fw-bold text-success">{Math.round(e.progressPercent || 0)}%</span>
                                         </div>
                                         <ProgressBar 
                                             variant="success" 
@@ -133,10 +160,17 @@ const MyEnrollments = () => {
                                         Đăng ký: {e.enrolledTime ? new Date(e.enrolledTime).toLocaleDateString('vi-VN') : 'N/A'}
                                     </div>
 
-                                    {/* NOTE: Nút bấm chỉ hiện 1 trạng thái duy nhất vì chắc chắn khóa này đã thanh toán */}
-                                    <div className="d-grid mt-auto">
+                                    <div className="d-grid mt-auto gap-2">
                                         <Button variant="primary" onClick={() => nav(`/courses/${e.courseId.id}`)}>
                                             <i className="bi bi-play-circle me-1"></i> Vào học tiếp
+                                        </Button>
+                                        
+                                        {/* Nút gọi hàm mở Chat mới */}
+                                        <Button 
+                                            variant="outline-info" 
+                                            onClick={() => startChatWithInstructor(e.courseId.instructorId)}
+                                        >
+                                            <i className="bi bi-chat-dots me-1"></i> Nhắn tin Giảng viên
                                         </Button>
                                     </div>
                                 </Card.Body>

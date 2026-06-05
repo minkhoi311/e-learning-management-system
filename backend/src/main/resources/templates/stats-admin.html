@@ -1,57 +1,60 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Thống kê Tổng quan</title>
-    <th:block th:replace="~{base :: css}"></th:block>
-</head>
-<body class="bg-light">
-    <div th:replace="~{base :: header}"></div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 
-    <section class="container mt-4 mb-5">
-        <h2 class="text-primary mb-4"><i class="bi bi-bar-chart-fill"></i> TỔNG QUAN HỆ THỐNG</h2>
+    <head th:replace="~{base :: css}"></head>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card bg-primary text-white shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Tổng Khóa Học</h5>
-                        <h2 class="display-5" th:text="${stats.totalCourses}">0</h2>
+    <body class="bg-light">
+        <div th:replace="~{base :: header}"></div>
+
+        <div class="container mt-4 mb-5">
+            <h3 class="text-primary mb-4"><i class="bi bi-bar-chart-fill"></i> Thống kê tổng quan</h3>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center p-3 shadow-sm border-0 border-start border-primary border-4">
+                        <h6 class="text-muted">Tổng khóa học</h6>
+                        <h3 class="fw-bold text-dark" th:text="${stats.totalCourses}">0</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center p-3 shadow-sm border-0 border-start border-success border-4">
+                        <h6 class="text-muted">Tổng đăng ký</h6>
+                        <h3 class="fw-bold text-dark" th:text="${stats.totalEnrollments}">0</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center p-3 shadow-sm border-0 border-start border-warning border-4">
+                        <h6 class="text-muted">Tổng Doanh thu</h6>
+                        <h3 class="fw-bold text-dark" th:text="${stats.totalRevenue != null ? #numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</h3>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card bg-success text-white shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Tổng Lượt Đăng Ký</h5>
-                        <h2 class="display-5" th:text="${stats.totalEnrollments}">0</h2>
-                    </div>
+
+            <div class="card p-4 mb-4 shadow-sm border-0">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <h5 class="mb-0 text-secondary"><i class="bi bi-graph-up"></i> Doanh thu theo tháng</h5>
+                    <select id="yearSelect" class="form-select w-auto fw-bold"
+                            th:onchange="'loadMonthlyRevenue(this.value, \'' + @{/api/stats/monthly} + '\')'">
+                        <option value="2023">Năm 2023</option>
+                        <option value="2024">Năm 2024</option>
+                        <option value="2025">Năm 2025</option>
+                        <option value="2026" selected>Năm 2026</option>
+                    </select>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-warning text-dark shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Tổng Doanh Thu</h5>
-                        <h2 class="display-5" th:text="${stats.totalRevenue != null ? #numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</h2>
-                    </div>
+
+                <div style="position: relative; height:40vh; width:100%">
+                    <canvas id="revenueChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white fw-bold">Người Dùng Theo Vai Trò</div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center" th:each="u : ${stats.usersByRole}">
-                            <span th:text="${u.role}">Vai trò</span>
-                            <span class="badge bg-primary rounded-pill" th:text="${u.count}">0</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
+        <div th:replace="~{base :: footer}"></div>
 
-    <div th:replace="~{base :: footer}"></div>
-</body>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script th:src="@{/js/script.js}"></script>
+
+
+
+    </body>
 </html>

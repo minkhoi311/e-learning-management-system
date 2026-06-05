@@ -34,7 +34,7 @@ export const endpoints = {
     
     // Stats
     'instructor-stats': '/secure/stats/overview',
-
+    'my-chat-sessions': '/secure/chat/sessions',
     'get-chat-room': '/secure/chat/room',
 }
 
@@ -42,7 +42,8 @@ export const authApis = () => {
     return axios.create({
         baseURL: "http://localhost:8080/backend/api/", 
         headers: {
-            'Authorization': `Bearer ${cookies.load('token')}`
+            'Authorization': `Bearer ${cookies.load('token')}`,
+            'Content-Type': 'application/json'
         }
     })
 }

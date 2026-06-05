@@ -93,6 +93,13 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new IllegalArgumentException("Không tìm thấy enrollment!");
         }
 
+        // 1. THÊM LOGIC KIỂM TRA TRÙNG LẶP: Đã hoàn thành rồi thì thoát luôn
+        boolean isAlreadyCompleted = e.getLessonProgressSet().stream()
+                .anyMatch(lp -> lp.getLessonId().getId() == lessonId && lp.getIsCompleted());
+
+        if (isAlreadyCompleted) {
+            return; 
+        }
         LessonProgress lp = new LessonProgress();
         lp.setEnrollmentId(e);
         lp.setLessonId(this.lessonRepo.getLessonById(lessonId));
@@ -102,10 +109,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         long total = this.lessonRepo.countLessonsByCourseId(e.getCourseId().getId());
         long done = this.lessonProgressRepo.countCompletedLessons(enrollmentId);
-        e.setProgressPercent(total > 0 ? (double) done / total * 100 : 0);
+        
+        double percent = (total > 0) ? ((double) done / total * 100) : 0;
+        e.setProgressPercent(Math.min(percent, 100.0));
+        
         this.enrollmentRepo.addOrUpdateEnrollment(e);
     }
-
     @Override
     public Enrollment updatePaymentMethod(int enrollmentId, String method) {
         Enrollment e = this.enrollmentRepo.getById(enrollmentId);

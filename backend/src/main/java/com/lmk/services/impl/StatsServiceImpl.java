@@ -26,8 +26,8 @@ public class StatsServiceImpl implements StatsService {
         stats.put("totalEnrollments", statsRepo.countAllEnrollments());
         stats.put("totalRevenue", statsRepo.sumSuccessPayments());
         stats.put("usersByRole", statsRepo.countUsersByRole().stream()
-            .map(r -> Map.of("role", r[0], "count", r[1])).toList());
-        
+                .map(r -> Map.of("role", r[0], "count", r[1])).toList());
+
         return stats;
     }
 
@@ -37,16 +37,31 @@ public class StatsServiceImpl implements StatsService {
         List<Object[]> perCourse = statsRepo.getRevenuePerCourseByInstructor(u.getId());
 
         double totalRevenue = perCourse.stream()
-            .mapToDouble(r -> r[2] != null ? ((Number) r[2]).doubleValue() : 0).sum();
+                .mapToDouble(r -> r[2] != null ? ((Number) r[2]).doubleValue() : 0).sum();
 
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("totalCourses", statsRepo.countCoursesByInstructor(u.getId()));
         stats.put("totalEnrollments", statsRepo.countEnrollmentsByInstructor(u.getId()));
         stats.put("totalRevenue", totalRevenue);
         stats.put("revenuePerCourse", perCourse.stream()
-            .map(r -> Map.of("subject", String.valueOf(r[0]), "enrollments", r[1],
+                .map(r -> Map.of("subject", String.valueOf(r[0]), "enrollments", r[1],
                 "revenue", r[2] != null ? r[2] : 0)).toList());
-                
+
         return stats;
+    }
+
+    @Override
+    public List<Map<String, Object>> getMonthlyRevenue(int year) {
+        double[] revenues = new double[13];
+        for (Object[] row : statsRepo.getMonthlyRevenue(year)) {
+            int month = ((Number) row[0]).intValue();
+            revenues[month] = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+        }
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (int m = 1; m <= 12; m++) {
+            result.add(Map.of("month", m, "revenue", revenues[m]));
+        }
+
+        return result;
     }
 }

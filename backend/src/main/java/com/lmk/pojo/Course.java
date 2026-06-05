@@ -25,7 +25,6 @@ import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Set;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,7 +69,7 @@ public class Course implements Serializable {
     private String image;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "price")
-    private BigDecimal price;
+    private Double price;
     @Column(name = "duration_hours")
     private Double durationHours;
     @Size(max = 500)
@@ -100,6 +99,7 @@ public class Course implements Serializable {
     @JsonIgnore
     private Set<Enrollment> enrollmentSet;
     
+    @JsonIgnore
     @Transient
     private MultipartFile file;
     
@@ -148,13 +148,10 @@ public class Course implements Serializable {
         this.image = image;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
+    public Double getPrice() {
+        return price; }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
+    public void setPrice(Double price) { this.price = price; }
 
     public Double getDurationHours() {
         return durationHours;

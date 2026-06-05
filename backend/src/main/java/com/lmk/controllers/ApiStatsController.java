@@ -2,6 +2,8 @@ package com.lmk.controllers;
 
 import com.lmk.services.StatsService;
 import java.security.Principal;
+import java.time.Year;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,8 +28,13 @@ public class ApiStatsController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/secure/stats/admin/overview")
-    public ResponseEntity<Map<String, Object>> adminStats() {
-        return new ResponseEntity<>(this.statsService.getAdminStats(),HttpStatus.OK);
+    @GetMapping("/stats/monthly")
+    public ResponseEntity<List<Map<String, Object>>> adminMonthlyStats(
+            @RequestParam(name = "year", defaultValue = "0") int year) {
+        if (year == 0) {
+            year = Year.now().getValue();
+        }
+        return new ResponseEntity<>(this.statsService.getMonthlyRevenue(year), HttpStatus.OK);
     }
+    
 }

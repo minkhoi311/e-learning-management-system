@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, Badge, Form } from 'react-bootstrap';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import cookies from 'react-cookies';
 import Apis, { endpoints } from '../../configs/Apis';
@@ -12,25 +12,34 @@ const Courses = () => {
     const [error, setError] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    
     const [compareList, setCompareList] = useState([]); 
     
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const nav = useNavigate();
     
     const [, cartDispatch] = useContext(MyCartContext);
     const [user] = useContext(MyUserContext); 
 
+    // --- State lưu trữ dữ liệu bộ lọc trên giao diện ---
+    const [filterKw, setFilterKw] = useState(searchParams.get('kw') || "");
+    const [filterFromPrice, setFilterFromPrice] = useState(searchParams.get('fromPrice') || "");
+    const [filterToPrice, setFilterToPrice] = useState(searchParams.get('toPrice') || "");
+    const [filterSort, setFilterSort] = useState(searchParams.get('sort') || "newest");
+
+    // Reset lại danh sách khi thay đổi từ khóa chính từ Header hoặc danh mục
     useEffect(() => {
         setPage(1);
         setCourses([]);
+        setFilterKw(searchParams.get('kw') || "");
     }, [searchParams.get('kw'), searchParams.get('cateId')]);
 
+    // Gọi API lấy danh sách khóa học kèm theo các bộ lọc
     useEffect(() => {
         const loadCourses = async () => {
             setLoading(true);
             setError(null);
             try {
+                // Đọc toàn bộ param hiện có trên URL để đẩy xuống Backend
                 let url = `${endpoints['courses']}?page=${page}`;
                 
                 let kw = searchParams.get('kw');
@@ -39,6 +48,15 @@ const Courses = () => {
                 let cateId = searchParams.get('cateId');
                 if (cateId) url += `&cateId=${cateId}`;
 
+                let fromPrice = searchParams.get('fromPrice');
+                if (fromPrice) url += `&fromPrice=${fromPrice}`;
+
+                let toPrice = searchParams.get('toPrice');
+                if (toPrice) url += `&toPrice=${toPrice}`;
+
+                let sort = searchParams.get('sort');
+                if (sort) url += `&sort=${sort}`;
+
                 let res = await Apis.get(url);
             
                 if (page === 1) {
@@ -46,7 +64,6 @@ const Courses = () => {
                 } else {
                     setCourses(current => [...current, ...res.data.courses]);
                 }
-                
                 setTotalPages(res.data.totalPages);
                 
             } catch (ex) {
@@ -60,13 +77,29 @@ const Courses = () => {
         loadCourses();
     }, [page, searchParams]);
 
+    // Xử lý khi nhấn nút "Lọc dữ liệu"
+    const handleFilterSubmit = (e) => {
+        e.preventDefault();
+        setPage(1); // Đưa về trang đầu tiên
+        setCourses([]);
+
+        // Đẩy các giá trị lọc lên URL bar để kích hoạt useEffect load lại API
+        const newParams = {};
+        if (filterKw.trim()) newParams.kw = filterKw.trim();
+        if (searchParams.get('cateId')) newParams.cateId = searchParams.get('cateId'); // Giữ lại danh mục cũ nếu có
+        if (filterFromPrice) newParams.fromPrice = filterFromPrice;
+        if (filterToPrice) newParams.toPrice = filterToPrice;
+        if (filterSort) newParams.sort = filterSort;
+
+        setSearchParams(newParams);
+    };
+
     const addToCart = (course) => {
         if (!user) {
             alert("Vui lòng đăng nhập để thêm khóa học vào giỏ!");
             nav('/login?next=/courses');
             return;
         }
-
         const cartCookieName = `cart_${user.username}`;
         let cart = cookies.load(cartCookieName) || {};
         
@@ -74,7 +107,6 @@ const Courses = () => {
             alert("Khóa học này đã có trong giỏ hàng!");
             return;
         }
-
         cart[course.id] = {
             id: course.id,
             subject: course.subject,
@@ -82,7 +114,6 @@ const Courses = () => {
             image: course.image,
             quantity: 1
         };
-        
         cookies.save(cartCookieName, cart, { path: '/', maxAge: 7 * 24 * 60 * 60 });
         cartDispatch({ type: 'UPDATE', payload: cart });
         alert("Đã thêm khóa học vào giỏ hàng thành công!");
@@ -108,12 +139,60 @@ const Courses = () => {
                 Danh sách khóa học
             </h2>
 
+            {/* ================= THANH TÌM KIẾM & BỘ LỌC NÂNG CAO ================= */}
+            <Card className="p-3 mb-4 shadow-sm border-0 bg-white">
+                <Form onSubmit={handleFilterSubmit} className="row g-2 align-items-end">
+                    <Col md={3}>
+                        <Form.Label className="text-muted small fw-bold">Tên khóa học</Form.Label>
+                        <Form.Control 
+                            type="text" 
+                            placeholder="Nhập từ khóa..." 
+                            value={filterKw}
+                            onChange={e => setFilterKw(e.target.value)}
+                        />
+                    </Col>
+                    <Col md={2}>
+                        <Form.Label className="text-muted small fw-bold">Giá từ (VNĐ)</Form.Label>
+                        <Form.Control 
+                            type="number" 
+                            placeholder="Ví dụ: 200000" 
+                            value={filterFromPrice}
+                            onChange={e => setFilterFromPrice(e.target.value)}
+                        />
+                    </Col>
+                    <Col md={2}>
+                        <Form.Label className="text-muted small fw-bold">Đến giá (VNĐ)</Form.Label>
+                        <Form.Control 
+                            type="number" 
+                            placeholder="Ví dụ: 1500000" 
+                            value={filterToPrice}
+                            onChange={e => setFilterToPrice(e.target.value)}
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Form.Label className="text-muted small fw-bold">Sắp xếp theo</Form.Label>
+                        <Form.Select value={filterSort} onChange={e => setFilterSort(e.target.value)}>
+                            <option value="newest">Khóa học mới nhất</option>
+                            <option value="name_asc">Tên khóa học (A - Z)</option>
+                            <option value="price_asc">Giá tăng dần</option>
+                            <option value="price_desc">Giá giảm dần</option>
+                        </Form.Select>
+                    </Col>
+                    <Col md={2}>
+                        <Button type="submit" variant="primary" className="w-100">
+                            <i className="bi bi-funnel-fill me-1"></i> Lọc kết quả
+                        </Button>
+                    </Col>
+                </Form>
+            </Card>
+
             {error && <Alert variant="danger">{error}</Alert>}
 
             {!loading && courses.length === 0 && !error && (
-                <Alert variant="info">Không tìm thấy khóa học nào phù hợp với yêu cầu của bạn.</Alert>
+                <Alert variant="info">Không tìm thấy khóa học nào phù hợp với tiêu chí tìm kiếm của bạn.</Alert>
             )}
 
+            {/* ================= DANH SÁCH KHÓA HỌC KẾT QUẢ ================= */}
             <Row className="g-4">
                 {courses.map(c => {
                     const isComparing = compareList.some(item => item.id === c.id);
@@ -121,7 +200,6 @@ const Courses = () => {
                     return (
                         <Col key={c.id} xs={12} sm={6} md={4} lg={3}>
                             <Card className={`h-100 hover-lift shadow-sm ${isComparing ? 'border-primary border-2' : 'border-0'}`}>
-                                
                                 <Link to={`/courses/${c.id}`} style={{ textDecoration: 'none' }}>
                                     <Card.Img 
                                         variant="top" 
@@ -172,7 +250,7 @@ const Courses = () => {
                 })}
             </Row>
 
-            {/* Nút Load More tải từ từ */}
+            {/* Nút Load More tải thêm trang */}
             {page < totalPages && (
                 <div className="text-center mt-4">
                     <Button 
@@ -186,7 +264,7 @@ const Courses = () => {
                 </div>
             )}
 
-            {/* Thanh menu so sánh dưới đáy */}
+            {/* Menu so sánh cố định dưới đáy */}
             {compareList.length > 0 && (
                 <div className="fixed-bottom bg-white border-top shadow-lg p-3 d-flex justify-content-between align-items-center" style={{ zIndex: 1000 }}>
                     <div className="d-flex align-items-center">

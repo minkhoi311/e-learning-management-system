@@ -29,7 +29,7 @@ const LessonDetail = () => {
             if (user && lessonData && lessonData.courseId) {
                 try {
                     let enrollRes = await authApis().get(endpoints['check-enrollment'](lessonData.courseId.id));
-                    setEnrollmentId(enrollRes.data.enrollmentId);
+                    setEnrollmentId(enrollRes.data.id);
                 } catch (enrollErr) {
                     console.log("User chưa đăng ký khóa học này hoặc không có quyền.");
                 }

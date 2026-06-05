@@ -2,6 +2,7 @@ import React, { useReducer } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import cookies from 'react-cookies';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css'; 
 import './styles/style.css'; 
 
@@ -12,7 +13,7 @@ import MyCartReducer from './reducers/MyCartReducer';
 import Header from './components/Header';
 import Footer from './components/Footer'; 
 import ScrollToTopButton from './components/ScrollToTopButton';
-
+import Home from './screens/Home/Home';
 import Courses from './screens/Course/Courses';
 import CompareCourses from './screens/Course/CompareCourses';
 import CourseDetail from './screens/Course/CourseDetail'; 
@@ -24,14 +25,13 @@ import MyEnrollments from './screens/User/MyEnrollments';
 import InstructorDashboard from './screens/Instructor/InstructorDashboard';
 import Profile from './screens/User/Profile';
 import ChangePassword from './screens/User/ChangePassword';
+import MyChats from './screens/User/MyChats';
 
 import InstructorCourses from './screens/Instructor/InstructorCourses';
 import CourseForm from './screens/Instructor/CourseForm';
 import InstructorStudents from './screens/Instructor/InstructorStudents';
-
-// Placeholder (Còn lại phần Trang chủ và Giảng viên)
-const Home = () => <div className="container mt-4 text-center"><h2>Trang chủ</h2></div>;
-const Instructors = () => <div className="container mt-4 text-center"><h2>Giảng viên</h2></div>;
+import InstructorChats from './screens/Instructor/InstructorChats';
+import ChatRoom from './screens/Chat/ChatRoom';
 
 const App = () => {
     const [user, dispatch] = useReducer(MyUserReducer, cookies.load('user') || null);
@@ -70,12 +70,13 @@ const App = () => {
                             <Route path="/compare" element={<CompareCourses />} /> 
                             <Route path="/lessons/:lessonId" element={<LessonDetail />} /> 
 
-                            <Route path="/instructors" element={<Instructors />} />
                             <Route path="/instructor/courses" element={<InstructorCourses />} />
                             <Route path="/instructor/courses/add" element={<CourseForm />} />
                             <Route path="/instructor/courses/edit/:courseId" element={<CourseForm />} />
                             <Route path="/instructor/courses/:courseId/students" element={<InstructorStudents />} />
-
+                            <Route path="/chat" element={<ChatRoom />} />
+                            <Route path="/instructor/chats" element={<InstructorChats />} />
+                            <Route path="/my-chats" element={<MyChats />} />
                             <Route path="/login" element={<Login />} /> 
                             <Route path="/register" element={<Register />} />
                             <Route path="/cart" element={<Cart />} />

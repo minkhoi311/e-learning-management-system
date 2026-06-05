@@ -32,6 +32,10 @@ public class JwtFilter implements Filter {
         
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         
+        if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
+            chain.doFilter(request, response);
+            return;
+        }
         if (httpRequest.getRequestURI().startsWith(String.format("%s/api/secure", httpRequest.getContextPath())) == true) {
         
            

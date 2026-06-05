@@ -84,7 +84,7 @@ public class CourseServiceImpl implements CourseService {
             errors.put("subject", "Tên khóa học không được để trống.");
         if (c.getPrice() == null)
             errors.put("price", "Học phí không được để trống.");
-        else if (c.getPrice().compareTo(BigDecimal.ZERO) < 0)
+        else if (c.getPrice() < 0)
             errors.put("price", "Học phí không được âm.");
         if (c.getInstructorId() == null)
             errors.put("instructor", "Khóa học phải có giảng viên.");

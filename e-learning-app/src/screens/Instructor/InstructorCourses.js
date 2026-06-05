@@ -85,7 +85,7 @@ const InstructorCourses = () => {
                                     <td className="text-success fw-bold">
                                         {c.price === 0 ? "Miễn phí" : `${c.price.toLocaleString("vi-VN")} đ`}
                                     </td>
-                                    <td>{c.duration || "N/A"} giờ</td>
+                                    <td>{c.durationHours || "N/A"} giờ</td>
                                     <td>
                                         <Button variant="outline-info" size="sm" className="me-2" onClick={() => nav(`/instructor/courses/${c.id}/students`)}>
                                             <i className="bi bi-people-fill me-1"></i> Sinh viên

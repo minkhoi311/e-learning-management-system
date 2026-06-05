@@ -99,21 +99,30 @@ public class ApiCourseController {
         if (u.getRole().equals("INSTRUCTOR") && !existingCourse.getInstructorId().getUsername().equals(u.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+        existingCourse.setSubject(c.getSubject());
+        existingCourse.setDescription(c.getDescription());
+        existingCourse.setPrice(c.getPrice());
+        existingCourse.setDurationHours(c.getDurationHours());
+        existingCourse.setVideoUrl(c.getVideoUrl());
 
-        c.setId(courseId);
-        c.setInstructorId(existingCourse.getInstructorId());
+        if (c.getCategoryId() != null && c.getCategoryId().getId() != null) {
+            existingCourse.setCategoryId(c.getCategoryId());
+        }
 
-        Map<String, String> errors = this.courseService.validate(c);
+        if (c.getFile() != null && !c.getFile().isEmpty()) {
+            existingCourse.setFile(c.getFile());
+        }
+        Map<String, String> errors = this.courseService.validate(existingCourse);
         if (!errors.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        this.courseService.addOrUpdateCourse(c);
-        return new ResponseEntity<>(c, HttpStatus.OK);
+        this.courseService.addOrUpdateCourse(existingCourse);
+        return new ResponseEntity<>(existingCourse, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
-    @DeleteMapping("/secure/courses/{courseId}")
+    @DeleteMapping("/courses/{courseId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable(value = "courseId") int courseId, Principal principal) {
         this.courseService.deleteCourse(courseId);

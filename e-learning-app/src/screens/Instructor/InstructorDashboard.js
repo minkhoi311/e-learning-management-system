@@ -85,29 +85,6 @@ const InstructorDashboard = () => {
                     </Card>
                 </Col>
             </Row>
-
-
-            <h5 className="mb-4 fw-bold text-secondary border-bottom pb-2">
-                <i className="bi bi-grid me-2 text-primary"></i> Lối Tắt Nhanh
-            </h5>
-            
-            <Nav variant="pills" as="ul" className="justify-content-center justify-content-md-between gap-3">
-                <Nav.Item as="li" className="flex-fill">
-                    <Nav.Link as={Link} to="/instructor/courses" className="bg-light text-dark border d-flex align-items-center justify-content-center py-3 shadow-sm hover-lift">
-                        <i className="bi bi-collection-play fs-4 text-primary me-2"></i>
-                        <span className="fw-bold">Quản lý Khóa học</span>
-                    </Nav.Link>
-                </Nav.Item>
-
-
-                <Nav.Item as="li" className="flex-fill">
-                    <Nav.Link as={Link} to="/profile" className="bg-light text-dark border d-flex align-items-center justify-content-center py-3 shadow-sm hover-lift">
-                        <i className="bi bi-person-badge fs-4 text-secondary me-2"></i>
-                        <span className="fw-bold">Hồ sơ cá nhân</span>
-                    </Nav.Link>
-                </Nav.Item>
-            </Nav>
-
         </Container>
     );
 };

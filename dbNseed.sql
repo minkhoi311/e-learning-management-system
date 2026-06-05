@@ -38,7 +38,7 @@ CREATE TABLE course (
     subject VARCHAR(255) NOT NULL,
     description TEXT,
     image VARCHAR(500),
-    price DECIMAL(10,2) DEFAULT 0.00,
+    price DOUBLE DEFAULT 0.0,  -- Đã đổi sang DOUBLE
     duration_hours DOUBLE,
     category_id INT NULL,
     instructor_id INT NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE lesson_progress (
 -- 8. Bảng Payment (Thanh toán)
 CREATE TABLE payment (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    amount DECIMAL(10,2) NOT NULL,
+    amount DOUBLE NOT NULL,  -- Đã đổi sang DOUBLE
     payment_method ENUM('CASH', 'MOMO', 'ZALOPAY') NOT NULL,
     status ENUM('PENDING', 'SUCCESS', 'FAILED') DEFAULT 'PENDING',
     transaction_reference VARCHAR(255) NULL,
@@ -121,7 +121,6 @@ CREATE TABLE chat_session (
     instructor_id INT NOT NULL,
     CONSTRAINT fk_chatsession_student FOREIGN KEY (student_id) REFERENCES user(id) ON DELETE CASCADE,
     CONSTRAINT fk_chatsession_instructor FOREIGN KEY (instructor_id) REFERENCES user(id) ON DELETE CASCADE,
-    -- (Tùy chọn) Đảm bảo một cặp Học viên - Giảng viên chỉ có 1 phòng chat duy nhất
     CONSTRAINT uq_student_instructor_chat UNIQUE (student_id, instructor_id) 
 );
 
@@ -179,7 +178,6 @@ INSERT INTO lesson_progress (id, is_completed, enrollment_id, lesson_id, complet
 (4, TRUE, 3, 4, '2026-05-10 15:30:00');
 
 -- 8. Thêm Payment
---    Đã sửa dòng thứ 2 từ STRIPE thành MOMO để khớp với enum cho phép
 INSERT INTO payment (id, amount, payment_method, status, transaction_reference, enrollment_id, paid_time) VALUES
 (1, 1200000, 'ZALOPAY', 'SUCCESS', 'ZLP_987654321', 1, '2026-04-20 10:15:00'),
 (2, 850000, 'MOMO', 'PENDING', 'MOMO_CH_112233', 2, NULL),

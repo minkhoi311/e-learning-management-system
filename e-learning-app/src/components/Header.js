@@ -44,11 +44,6 @@ const Header = () => {
         }
     }, [user, cartCounter, isInstructor]); 
     
-    const search = (e) => {
-        e.preventDefault();
-        nav(`/courses?kw=${kw}`); 
-    };
-
     const handleLogout = () => {
         dispatch({ "type": "LOGOUT" });
         nav("/"); 
@@ -63,10 +58,10 @@ const Header = () => {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 
                 <Navbar.Collapse id="basic-navbar-nav">
-                    {/* ================= LEFT MENU ================= */}
+
                     <Nav className="me-auto">
                         {isInstructor ? (
-                            // MENU DÀNH CHO GIẢNG VIÊN
+
                             <>
                                 <Link className="nav-link" to="/instructor">
                                     <i className="bi bi-speedometer2 me-1"></i> Thống kê
@@ -79,7 +74,7 @@ const Header = () => {
                                 </Link>
                             </>
                         ) : (
-                            // MENU DÀNH CHO HỌC VIÊN / KHÁCH
+
                             <>
                                 <Link className="nav-link" to="/">Trang chủ</Link>
                                 <Link className="nav-link" to="/courses">Khóa học</Link>
@@ -105,9 +100,7 @@ const Header = () => {
                         )}
                     </Nav>
 
-                    {/* ================= RIGHT MENU ================= */}
                     <Nav className="align-items-center">
-                        {/* Giỏ hàng chỉ hiện cho Học viên / Khách */}
                         {!isInstructor && (
                             <Link className="nav-link me-3 d-flex align-items-center" to="/cart">
                                 <FontAwesomeIcon icon={faCartShopping} /> 

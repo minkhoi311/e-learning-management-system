@@ -56,12 +56,13 @@ public class ApiUserController {
         return new ResponseEntity<>(this.userService.getUserByUsername(principal.getName()), HttpStatus.OK);
     }
 
+    
     @PatchMapping("/secure/profile")
     public ResponseEntity<User> updateCurrentUser(@ModelAttribute User u, Principal principal) {
         return new ResponseEntity<>(this.userService.updateProfile(u, principal.getName()), HttpStatus.OK);
     }
 
-    //đang làm vượt mức controller
+    
     @PostMapping("/secure/change-password")
     @ResponseStatus(HttpStatus.OK)
     public void changePassword(@RequestBody Map<String, String> body, Principal principal) {
@@ -70,25 +71,12 @@ public class ApiUserController {
         this.userService.changePassword(principal.getName(), oldPassword, newPassword);
     }
     
-    //đang làm vượt mức controller
+    
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/users/approve")
     public ResponseEntity<Void> approveInstructor(@RequestBody Map<String, Object> payload) {
-        try {
-            if (payload == null || !payload.containsKey("id")) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
             int id = Integer.parseInt(payload.get("id").toString());
-            boolean ok = this.userService.approveInstructor(id);
-
-            if (!ok) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
+            this.userService.approveInstructor(id);
             return new ResponseEntity<>(HttpStatus.OK);
-
-        } catch (NumberFormatException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
     }
 }

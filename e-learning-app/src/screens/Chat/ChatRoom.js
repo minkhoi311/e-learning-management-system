@@ -10,13 +10,13 @@ const ChatRoom = () => {
     const location = useLocation();
     const nav = useNavigate();
     
-    // Lấy dữ liệu được truyền từ trang trước sang
+
     const { roomId, targetName } = location.state || {};
 
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
 
-    // Lắng nghe tin nhắn từ Firebase
+
     useEffect(() => {
         if (roomId) {
             const messagesRef = ref(database, `messages/${roomId}`);
@@ -59,7 +59,7 @@ const ChatRoom = () => {
         return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Nếu F5 tải lại trang làm mất state, điều hướng về trang chủ
+
     if (!user || !roomId) {
         return <Navigate to="/" replace />;
     }
@@ -80,7 +80,7 @@ const ChatRoom = () => {
                     </div>
                 </Card.Header>
                 
-                {/* Khu vực hiển thị tin nhắn */}
+
                 <Card.Body className="d-flex flex-column" style={{ backgroundColor: '#f8f9fa', overflowY: 'auto' }}>
                     {messages.length === 0 ? (
                         <div className="text-center text-muted my-auto">

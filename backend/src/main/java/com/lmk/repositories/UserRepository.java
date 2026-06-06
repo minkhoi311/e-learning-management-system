@@ -13,8 +13,7 @@ import java.util.Map;
  * @author Acer
  */
 public interface UserRepository {
-    List<User> getUsers(Map<String, String> params);
-    Long countUsers(Map<String, String> params);
+List<User> getUsers(Map<String, String> params);
     User getUserById(int id);
     User getUserByUsername(String username);
     List<User> getUsersByRole(String role);

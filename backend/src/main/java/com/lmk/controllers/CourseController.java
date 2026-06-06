@@ -4,11 +4,8 @@ import com.lmk.pojo.Course;
 import com.lmk.services.CategoryService;
 import com.lmk.services.CourseService;
 import com.lmk.services.UserService;
-import com.lmk.utils.DaoUtils;
-import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,22 +28,11 @@ public class CourseController {
     @Autowired
     private UserService userService;
     
-    @Autowired
-    private Environment env;
-    
+
     @GetMapping("/courses")
     public String listCourses(Model model, @RequestParam Map<String, String> params) {
-        List<Course> list = courseService.getCourses(params);
-        model.addAttribute("courses", list);
+        model.addAttribute("courses", courseService.getCourses(params));
         model.addAttribute("categories", categoryService.getCates());
-
-        Long totalItems = courseService.countCourses(params);
-        int pageSize = Integer.parseInt(env.getProperty("courses.page_size", "20"));
-        int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
-
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("currentPage", Integer.parseInt(params.getOrDefault("page", "1")));
-
         return "course"; 
     }
     

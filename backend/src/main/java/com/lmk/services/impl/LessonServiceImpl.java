@@ -33,11 +33,6 @@ public class LessonServiceImpl implements LessonService {
     public Lesson getLessonById(int id) {
         return this.lessonRepo.getLessonById(id);
     }
-    
-    @Override
-    public Long countLessons(Map<String, String> params) {
-        return this.lessonRepo.countLessons(params);
-    }
 
     @Override
     public void addOrUpdateLesson(Lesson l) {

@@ -107,19 +107,7 @@ const Login = () => {
                         </div>
                     </Form>
 
-                    {/* Vạch ngăn cách */}
-                    <div className="d-flex align-items-center my-4">
-                        <hr className="flex-grow-1 text-muted" />
-                        <span className="mx-2 text-muted small">HOẶC</span>
-                        <hr className="flex-grow-1 text-muted" />
-                    </div>
-
-                    <div className="d-grid">
-                        <Button variant="outline-danger" onClick={handleGoogleLogin} className="d-flex align-items-center justify-content-center">
-                            <i className="bi bi-google me-2"></i> Tiếp tục với Google
-                        </Button>
-                    </div>
-
+ 
                     <div className="text-center mt-4 small">
                         Chưa có tài khoản? <Link to="/register" className="text-decoration-none fw-bold">Đăng ký ngay</Link>
                     </div>

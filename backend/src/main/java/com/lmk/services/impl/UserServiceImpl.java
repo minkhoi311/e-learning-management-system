@@ -60,11 +60,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long countUsers(Map<String, String> params) {
-        return this.userRepo.countUsers(params);
-    }
-
-    @Override
     public User getUserById(int id) {
         return this.userRepo.getUserById(id);
     }

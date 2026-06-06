@@ -14,7 +14,6 @@ import java.util.Map;
  */
 public interface CourseRepository {
     List<Course> getCourses(Map<String, String> params);
-    Long countCourses(Map<String, String> params);
     void addOrUpdateCourse(Course c);
     Course getCourseById(int id);
     List<Course> getCoursesByIds(List<Integer> ids);

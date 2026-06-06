@@ -89,7 +89,7 @@ const CourseDetail = () => {
                     {lessons.map((lesson, index) => (
                         <ListGroup.Item key={lesson.id} className="p-3 hover-lift border-bottom">
                             <Row className="align-items-center">
-                                {/* Cột Ảnh */}
+
                                 <Col xs={4} md={2} className="text-center">
                                     <img 
                                         src={lesson.image || 'https://via.placeholder.com/150x100?text=Lesson'} 
@@ -99,7 +99,7 @@ const CourseDetail = () => {
                                     />
                                 </Col>
 
-                                {/* Cột Tiêu đề & Mô tả */}
+          
                                 <Col xs={8} md={8}>
                                     <div className="d-flex align-items-center mb-1">
                                         <Badge bg="secondary" className="me-2">Bài {index + 1}</Badge>
@@ -110,7 +110,7 @@ const CourseDetail = () => {
                                     </p>
                                 </Col>
 
-                                {/* Cột Nút Action */}
+   
                                 <Col xs={12} md={2} className="text-md-end text-center mt-3 mt-md-0">
                                     <Button 
                                         variant="outline-primary" 

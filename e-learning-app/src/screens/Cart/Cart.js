@@ -170,7 +170,6 @@ const Cart = () => {
                             
                             <hr className="mb-3" />
                             
-                            {/* Khu vực chọn Phương thức thanh toán */}
                             <h6 className="fw-bold mb-3">Phương thức thanh toán:</h6>
                             <Form>
                                 <Form.Check 

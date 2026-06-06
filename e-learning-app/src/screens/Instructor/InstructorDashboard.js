@@ -14,7 +14,7 @@ const InstructorDashboard = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Chốt chặn bảo mật ở Frontend
+
         if (!user || user.role !== 'INSTRUCTOR') {
             nav('/');
             return;

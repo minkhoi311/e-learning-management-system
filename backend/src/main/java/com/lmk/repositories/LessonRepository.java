@@ -8,8 +8,6 @@ public interface LessonRepository {
 
     List<Lesson> getLessons(Map<String, String> params);
 
-    Long countLessons(Map<String, String> params);
-
     Long countLessonsByCourseId(int courseId);
 
     Lesson getLessonById(int id);

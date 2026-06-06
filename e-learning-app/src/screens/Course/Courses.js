@@ -8,91 +8,96 @@ import MySpinner from '../../components/MySpinner';
 
 const Courses = () => {
     const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [compareList, setCompareList] = useState([]); 
     
+    const [compareList, setCompareList] = useState([]); 
     const [searchParams, setSearchParams] = useSearchParams();
     const nav = useNavigate();
     
     const [, cartDispatch] = useContext(MyCartContext);
     const [user] = useContext(MyUserContext); 
 
-    // --- State lưu trữ dữ liệu bộ lọc trên giao diện ---
     const [filterKw, setFilterKw] = useState(searchParams.get('kw') || "");
     const [filterFromPrice, setFilterFromPrice] = useState(searchParams.get('fromPrice') || "");
     const [filterToPrice, setFilterToPrice] = useState(searchParams.get('toPrice') || "");
     const [filterSort, setFilterSort] = useState(searchParams.get('sort') || "newest");
 
-    // Reset lại danh sách khi thay đổi từ khóa chính từ Header hoặc danh mục
-    useEffect(() => {
-        setPage(1);
-        setCourses([]);
-        setFilterKw(searchParams.get('kw') || "");
-    }, [searchParams.get('kw'), searchParams.get('cateId')]);
-
-    // Gọi API lấy danh sách khóa học kèm theo các bộ lọc
-    useEffect(() => {
-        const loadCourses = async () => {
+    const loadCourses = async () => {
+        try {
             setLoading(true);
-            setError(null);
-            try {
-                // Đọc toàn bộ param hiện có trên URL để đẩy xuống Backend
-                let url = `${endpoints['courses']}?page=${page}`;
-                
-                let kw = searchParams.get('kw');
-                if (kw) url += `&kw=${kw}`;
-                
-                let cateId = searchParams.get('cateId');
-                if (cateId) url += `&cateId=${cateId}`;
-
-                let fromPrice = searchParams.get('fromPrice');
-                if (fromPrice) url += `&fromPrice=${fromPrice}`;
-
-                let toPrice = searchParams.get('toPrice');
-                if (toPrice) url += `&toPrice=${toPrice}`;
-
-                let sort = searchParams.get('sort');
-                if (sort) url += `&sort=${sort}`;
-
-                let res = await Apis.get(url);
             
-                if (page === 1) {
-                    setCourses(res.data.courses);
-                } else {
-                    setCourses(current => [...current, ...res.data.courses]);
-                }
-                setTotalPages(res.data.totalPages);
-                
-            } catch (ex) {
-                console.error("Lỗi tải khóa học:", ex);
-                setError("Không thể tải danh sách khóa học. Vui lòng thử lại sau.");
-            } finally {
-                setLoading(false);
-            }
-        };
+            let url = `${endpoints['courses']}?page=${page}`;
 
-        loadCourses();
+            const kw = searchParams.get('kw');
+            if (kw) url += `&kw=${kw}`;
+
+            const cateId = searchParams.get('cateId');
+            if (cateId) url += `&cateId=${cateId}`;
+
+            const fromPrice = searchParams.get('fromPrice');
+            if (fromPrice) url += `&fromPrice=${fromPrice}`;
+
+            const toPrice = searchParams.get('toPrice');
+            if (toPrice) url += `&toPrice=${toPrice}`;
+
+            const sort = searchParams.get('sort');
+            if (sort) url += `&sort=${sort}`;
+
+            let res = await Apis.get(url);
+            let data = res.data || [];
+
+            if (data.length === 0) {
+                setPage(0);
+            }
+            if (page === 1) {
+                setCourses(data);
+            } else if (page > 1) {
+                setCourses([...courses, ...data]);
+            }
+            
+        } catch (ex) {
+            console.error("Lỗi tải khóa học:", ex);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (page > 0) {
+            loadCourses();
+        }
     }, [page, searchParams]);
 
-    // Xử lý khi nhấn nút "Lọc dữ liệu"
+
+    useEffect(() => {
+        setPage(1);
+        setFilterKw(searchParams.get('kw') || "");
+        setFilterFromPrice(searchParams.get('fromPrice') || "");
+        setFilterToPrice(searchParams.get('toPrice') || "");
+        setFilterSort(searchParams.get('sort') || "newest");
+    }, [searchParams]);
+
+
+    const loadMore = () => {
+        if (page > 0 && !loading) {
+            setPage(page + 1);
+        }
+    };
+
+
     const handleFilterSubmit = (e) => {
         e.preventDefault();
-        setPage(1); // Đưa về trang đầu tiên
-        setCourses([]);
-
-        // Đẩy các giá trị lọc lên URL bar để kích hoạt useEffect load lại API
         const newParams = {};
         if (filterKw.trim()) newParams.kw = filterKw.trim();
-        if (searchParams.get('cateId')) newParams.cateId = searchParams.get('cateId'); // Giữ lại danh mục cũ nếu có
+        if (searchParams.get('cateId')) newParams.cateId = searchParams.get('cateId');
         if (filterFromPrice) newParams.fromPrice = filterFromPrice;
         if (filterToPrice) newParams.toPrice = filterToPrice;
         if (filterSort) newParams.sort = filterSort;
 
         setSearchParams(newParams);
     };
+
 
     const addToCart = (course) => {
         if (!user) {
@@ -108,11 +113,7 @@ const Courses = () => {
             return;
         }
         cart[course.id] = {
-            id: course.id,
-            subject: course.subject,
-            price: course.price,
-            image: course.image,
-            quantity: 1
+            id: course.id, subject: course.subject, price: course.price, image: course.image, quantity: 1
         };
         cookies.save(cartCookieName, cart, { path: '/', maxAge: 7 * 24 * 60 * 60 });
         cartDispatch({ type: 'UPDATE', payload: cart });
@@ -139,7 +140,7 @@ const Courses = () => {
                 Danh sách khóa học
             </h2>
 
-            {/* ================= THANH TÌM KIẾM & BỘ LỌC NÂNG CAO ================= */}
+            {/* BỘ LỌC */}
             <Card className="p-3 mb-4 shadow-sm border-0 bg-white">
                 <Form onSubmit={handleFilterSubmit} className="row g-2 align-items-end">
                     <Col md={3}>
@@ -186,13 +187,11 @@ const Courses = () => {
                 </Form>
             </Card>
 
-            {error && <Alert variant="danger">{error}</Alert>}
-
-            {!loading && courses.length === 0 && !error && (
-                <Alert variant="info">Không tìm thấy khóa học nào phù hợp với tiêu chí tìm kiếm của bạn.</Alert>
+            {/* LIST KHÓA HỌC */}
+            {!loading && courses.length === 0 && (
+                <Alert variant="info" className="mt-2">Không tìm thấy khóa học nào phù hợp với tiêu chí tìm kiếm của bạn.</Alert>
             )}
 
-            {/* ================= DANH SÁCH KHÓA HỌC KẾT QUẢ ================= */}
             <Row className="g-4">
                 {courses.map(c => {
                     const isComparing = compareList.some(item => item.id === c.id);
@@ -250,21 +249,23 @@ const Courses = () => {
                 })}
             </Row>
 
-            {/* Nút Load More tải thêm trang */}
-            {page < totalPages && (
+            {/* NÚT XEM THÊM (Chỉ hiện khi page > 0) */}
+            {page > 0 && !loading && (
                 <div className="text-center mt-4">
                     <Button 
                         variant="outline-primary" 
                         size="lg"
                         className="px-5 rounded-pill"
-                        onClick={() => setPage(page + 1)} 
-                        disabled={loading}>
-                        {loading ? <MySpinner /> : <span><i className="bi bi-arrow-down-circle me-2"></i> Xem thêm khóa học</span>}
+                        onClick={loadMore} 
+                    >
+                        <span><i className="bi bi-arrow-down-circle me-2"></i> Xem thêm khóa học</span>
                     </Button>
                 </div>
             )}
+            
+            {loading && <div className="text-center mt-3"><MySpinner /></div>}
 
-            {/* Menu so sánh cố định dưới đáy */}
+            {/* THANH SO SÁNH */}
             {compareList.length > 0 && (
                 <div className="fixed-bottom bg-white border-top shadow-lg p-3 d-flex justify-content-between align-items-center" style={{ zIndex: 1000 }}>
                     <div className="d-flex align-items-center">

@@ -41,7 +41,6 @@ public class DispatcherServletInit extends AbstractAnnotationConfigDispatcherSer
         
     }
     
-    //ghi đè để custome ảnh
     @Override
     protected void customizeRegistration(ServletRegistration.Dynamic registration) {
         String location = "/";

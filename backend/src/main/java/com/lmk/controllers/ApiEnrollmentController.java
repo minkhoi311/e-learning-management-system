@@ -28,15 +28,9 @@ public class ApiEnrollmentController {
 
     @Autowired
     private EnrollmentService enrollmentService;
-    
+
     @Autowired
     private UserService userService;
-    
-    @Autowired
-    private MomoService moMoService;
-    
-    @Autowired
-    private CourseService courseService;
 
     @GetMapping("/secure/enrollments/check/{courseId}")
     public ResponseEntity<Enrollment> checkEnrollment(@PathVariable("courseId") int courseId, Principal principal) {
@@ -57,9 +51,6 @@ public class ApiEnrollmentController {
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/secure/courses/{courseId}/enroll")
     public ResponseEntity<Enrollment> enroll(@PathVariable("courseId") int courseId, Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         try {
             Enrollment e = this.enrollmentService.enroll(courseId, principal.getName());
             return new ResponseEntity<>(e, HttpStatus.CREATED);
@@ -72,43 +63,18 @@ public class ApiEnrollmentController {
 
     @GetMapping("/secure/enrollments")
     public ResponseEntity<List<Enrollment>> myEnrollments(Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         List<Enrollment> list = this.enrollmentService.getByUsername(principal.getName());
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/secure/enrollments/{enrollmentId}/pay")
     public ResponseEntity<Map<String, Object>> processPayment(
             @PathVariable("enrollmentId") int enrollmentId,
-            @RequestBody Map<String, String> payload, 
-            Principal principal) {
-        
+            @RequestBody Map<String, String> payload) {
+
         String method = payload.get("method");
-        Enrollment enrollment = this.enrollmentService.updatePaymentMethod(enrollmentId, method);
-        
-        if (enrollment == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        if ("CASH".equalsIgnoreCase(method)) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else if ("MOMO".equalsIgnoreCase(method)) {
-            long amount = Math.round(enrollment.getCourseId().getPrice().doubleValue());
-            String orderInfo = "Thanh toan khoa hoc: " + enrollment.getCourseId().getSubject();
-            
-            String moMoPayUrl = this.moMoService.createMoMoPayment(enrollmentId, amount, orderInfo);
-            
-            if (moMoPayUrl != null) {
-                return new ResponseEntity<>(Map.of("payment_url", moMoPayUrl), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        Map<String, Object> response = this.enrollmentService.processPaymentFlow(enrollmentId, method);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/payments/webhook")
@@ -119,23 +85,10 @@ public class ApiEnrollmentController {
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/secure/instructor/courses/{courseId}/students")
     public ResponseEntity<List<Enrollment>> getStudentsByCourse(@PathVariable("courseId") int courseId, Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        Course course = this.courseService.getCourseById(courseId);
-        if (course == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        
-        if (!course.getInstructorId().getUsername().equals(principal.getName())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
         List<Enrollment> enrollments = this.enrollmentService.getEnrollmentsByCourse(courseId);
         return new ResponseEntity<>(enrollments, HttpStatus.OK);
     }

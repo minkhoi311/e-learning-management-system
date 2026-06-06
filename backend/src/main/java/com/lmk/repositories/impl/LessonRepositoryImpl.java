@@ -1,9 +1,7 @@
 package com.lmk.repositories.impl;
 
-import com.lmk.pojo.Course;
 import com.lmk.pojo.Lesson;
 import com.lmk.repositories.LessonRepository;
-import com.lmk.utils.DaoUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -66,29 +64,16 @@ public class LessonRepositoryImpl implements LessonRepository {
 
         Query<Lesson> query = s.createQuery(q);
 
-        if (params != null && params.containsKey("page")) {
-            int pageSize = this.env.getProperty("lessons.page_size", Integer.class, 20);
+        if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            query.setFirstResult((page - 1) * pageSize);
+            int pageSize = this.env.getProperty("lessons.page_size", Integer.class, 1);
+            int start = (page - 1) * pageSize;
+
             query.setMaxResults(pageSize);
+            query.setFirstResult(start);
         }
 
         return query.getResultList();
-    }
-    
-    @Override
-    public Long countLessons(Map<String, String> params) {
-        Session s = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = s.getCriteriaBuilder();
-        CriteriaQuery<Long> q = b.createQuery(Long.class);
-        Root<Lesson> root = q.from(Lesson.class);
-        q.select(b.count(root));
-
-        List<Predicate> predicates = buildPredicates(b, root, params);
-        if (!predicates.isEmpty())
-            q.where(predicates.toArray(Predicate[]::new));
-
-        return s.createQuery(q).getSingleResult();
     }
     
      @Override

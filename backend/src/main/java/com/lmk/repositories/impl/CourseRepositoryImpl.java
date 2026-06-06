@@ -2,7 +2,6 @@ package com.lmk.repositories.impl;
 
 import com.lmk.pojo.Course;
 import com.lmk.repositories.CourseRepository;
-import com.lmk.utils.DaoUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -75,7 +74,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         Session session = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Course> q = b.createQuery(Course.class);
-        Root root = q.from(Course.class);
+        Root<Course> root = q.from(Course.class);
         q.select(root);
 
         List<Predicate> predicates = buildPredicates(b, root, params);
@@ -86,44 +85,25 @@ public class CourseRepositoryImpl implements CourseRepository {
         if (params != null) {
             String sort = params.getOrDefault("sort", "newest");
             switch (sort) {
-                case "price_asc" ->
-                    q.orderBy(b.asc(root.get("price")));
-                case "price_desc" ->
-                    q.orderBy(b.desc(root.get("price")));
-                case "name_asc" ->
-                    q.orderBy(b.asc(root.get("subject")));
-                default ->
-                    q.orderBy(b.desc(root.get("createdTime")));
+                case "price_asc" -> q.orderBy(b.asc(root.get("price")));
+                case "price_desc" -> q.orderBy(b.desc(root.get("price")));
+                case "name_asc" -> q.orderBy(b.asc(root.get("subject")));
+                default -> q.orderBy(b.desc(root.get("createdTime")));
             }
         }
 
         Query<Course> query = session.createQuery(q);
 
-        if (params != null && params.containsKey("page")) {
-            int pageSize = this.env.getProperty("courses.page_size", Integer.class);
+        if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
+            int pageSize = this.env.getProperty("courses.page_size", Integer.class, 1);
             int start = (page - 1) * pageSize;
+
             query.setMaxResults(pageSize);
             query.setFirstResult(start);
         }
+
         return query.getResultList();
-
-    }
-
-    @Override
-    public Long countCourses(Map<String, String> params) {
-        Session s = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = s.getCriteriaBuilder();
-        CriteriaQuery<Long> q = b.createQuery(Long.class);
-        Root<Course> root = q.from(Course.class);
-        q.select(b.count(root));
-
-        List<Predicate> predicates = buildPredicates(b, root, params);
-        if (!predicates.isEmpty()) {
-            q.where(predicates.toArray(Predicate[]::new));
-        }
-
-        return s.createQuery(q).getSingleResult();
     }
 
     @Override

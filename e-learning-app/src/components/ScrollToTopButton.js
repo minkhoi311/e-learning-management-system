@@ -4,7 +4,6 @@ import { Button } from 'react-bootstrap';
 export default function ScrollToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Kiểm tra vị trí cuộn chuột
   const toggleVisibility = () => {
     if (window.pageYOffset > 300) {
       setIsVisible(true);
@@ -13,7 +12,6 @@ export default function ScrollToTopButton() {
     }
   };
 
-  // Hàm trượt mượt mà lên đầu trang
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -30,7 +28,7 @@ export default function ScrollToTopButton() {
     <>
       {isVisible && (
         <Button
-          variant="warning" // Dùng màu warning cho đồng bộ giao diện ANQINKO
+          variant="warning" 
           onClick={scrollToTop}
           className="rounded-circle shadow border-0 d-flex align-items-center justify-content-center text-dark"
           style={{

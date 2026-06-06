@@ -21,11 +21,10 @@ const LessonDetail = () => {
         try {
             setLoading(true);
             let res = await Apis.get(endpoints['lesson-details'](lessonId));
-            let lessonData = res.data; // Lưu vào biến tạm
+            let lessonData = res.data; 
             
-            setLesson(lessonData); // Cập nhật state cho giao diện
+            setLesson(lessonData); 
 
-            // Dùng biến tạm lessonData để kiểm tra thay vì dùng state 'lesson'
             if (user && lessonData && lessonData.courseId) {
                 try {
                     let enrollRes = await authApis().get(endpoints['check-enrollment'](lessonData.courseId.id));
@@ -41,7 +40,7 @@ const LessonDetail = () => {
         }
     };
 
-    // Load bình luận
+
     const loadComments = async () => {
         try {
             let res = await Apis.get(endpoints['comments'](lessonId));
@@ -54,7 +53,6 @@ const LessonDetail = () => {
     useEffect(() => {
         loadLesson();
         loadComments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lessonId]);
 
     const addComment = async () => {
@@ -72,7 +70,7 @@ const LessonDetail = () => {
         }
     };
 
-// Hoàn thành khóa học
+
     const handleComplete = async () => {
         if (!enrollmentId) {
             alert("Bạn chưa đăng ký khóa học này hoặc chưa đăng nhập!");

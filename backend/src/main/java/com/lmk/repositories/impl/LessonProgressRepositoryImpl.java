@@ -48,4 +48,5 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         session.persist(progress);
     }
 
+    
 }

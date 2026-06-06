@@ -22,15 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @ControllerAdvice
 public class HomeController {
     @Autowired
-    private CategoryService cateService;
-    
-    @Autowired
     private UserService userService;
     
-    @ModelAttribute
-    public void commonResponses(Model model) {
-        model.addAttribute("categories", this.cateService.getCates());
-    }
     
     @RequestMapping("/")
     public String index(Model model, Principal principal) {

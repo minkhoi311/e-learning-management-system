@@ -72,13 +72,13 @@ const CourseForm = () => {
 
         try {
             if (isEditMode) {
-                // CHUẨN HÓA: PATCH Cập nhật khóa học
+
                 await authApis().patch(endpoints['update-course'](courseId), formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 alert("Cập nhật thông tin khóa học thành công!");
             } else {
-                // CHUẨN HÓA: POST Tạo mới khóa học
+
                 await authApis().post(endpoints['add-course'], formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });

@@ -15,6 +15,8 @@ import com.lmk.repositories.LessonProgressRepository;
 import com.lmk.repositories.LessonRepository;
 import com.lmk.repositories.UserRepository;
 import com.lmk.services.EnrollmentService;
+import com.lmk.services.MomoService;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Autowired
     private LessonProgressRepository lessonProgressRepo;
+
+    @Autowired
+    private MomoService moMoService;
 
     @Override
     public List<Enrollment> getByUsername(String username) {
@@ -93,12 +98,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new IllegalArgumentException("Không tìm thấy enrollment!");
         }
 
-        // 1. THÊM LOGIC KIỂM TRA TRÙNG LẶP: Đã hoàn thành rồi thì thoát luôn
         boolean isAlreadyCompleted = e.getLessonProgressSet().stream()
                 .anyMatch(lp -> lp.getLessonId().getId() == lessonId && lp.getIsCompleted());
 
         if (isAlreadyCompleted) {
-            return; 
+            return;
         }
         LessonProgress lp = new LessonProgress();
         lp.setEnrollmentId(e);
@@ -109,12 +113,25 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         long total = this.lessonRepo.countLessonsByCourseId(e.getCourseId().getId());
         long done = this.lessonProgressRepo.countCompletedLessons(enrollmentId);
-        
+
         double percent = (total > 0) ? ((double) done / total * 100) : 0;
         e.setProgressPercent(Math.min(percent, 100.0));
-        
+
         this.enrollmentRepo.addOrUpdateEnrollment(e);
     }
+
+    @Override
+    public List<Enrollment> getInstructorCourseEnrollments(int courseId, String username) {
+        Course course = this.courseRepo.getCourseById(courseId);
+        if (course == null) {
+            throw new EntityNotFoundException("Không tìm thấy khóa học");
+        }
+        if (!course.getInstructorId().getUsername().equals(username)) {
+            throw new SecurityException("Bạn không có quyền truy cập dữ liệu này");
+        }
+        return this.enrollmentRepo.getByCourseId(courseId);
+    }
+
     @Override
     public Enrollment updatePaymentMethod(int enrollmentId, String method) {
         Enrollment e = this.enrollmentRepo.getById(enrollmentId);
@@ -142,19 +159,46 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         this.enrollmentRepo.addOrUpdateEnrollment(e);
         return e;
     }
-    
-    
+
+    @Override
+    public Map<String, Object> processPaymentFlow(int enrollmentId, String method) {
+        Enrollment enrollment = updatePaymentMethod(enrollmentId, method);
+        if (enrollment == null) {
+            throw new EntityNotFoundException("Không tìm thấy đăng ký");
+        }
+
+        if ("CASH".equalsIgnoreCase(method)) {
+            return Map.of("status", "SUCCESS");
+        } else if ("MOMO".equalsIgnoreCase(method)) {
+            long amount = Math.round(enrollment.getCourseId().getPrice());
+            String orderInfo = "Thanh toan khoa hoc: " + enrollment.getCourseId().getSubject();
+            String moMoPayUrl = this.moMoService.createMoMoPayment(enrollmentId, amount, orderInfo);
+
+            if (moMoPayUrl != null) {
+                return Map.of("payment_url", moMoPayUrl);
+            }
+            throw new RuntimeException("Lỗi khởi tạo giao dịch MoMo");
+        }
+        throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ");
+    }
+
     @Override
     public boolean processWebhook(Map<String, Object> payload) {
         try {
             Object resultCodeObj = payload.get("resultCode");
-            if (resultCodeObj == null) return false;
+            if (resultCodeObj == null) {
+                return false;
+            }
 
             int resultCode = Integer.parseInt(resultCodeObj.toString());
             String orderIdMoMo = (String) payload.get("orderId");
-            if (orderIdMoMo == null) return false;
+            if (orderIdMoMo == null) {
+                return false;
+            }
 
-            if (resultCode != 0) return true; // Thất bại, báo OK để MoMo không gọi lại
+            if (resultCode != 0) {
+                return true;
+            }
 
             int enrollmentId = Integer.parseInt(orderIdMoMo.split("_")[0]);
             Enrollment e = this.enrollmentRepo.getById(enrollmentId);
@@ -163,8 +207,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 Payment p = e.getPayment();
                 p.setStatus("SUCCESS");
                 p.setPaidTime(new Date());
-                if (payload.get("transId") != null)
+                if (payload.get("transId") != null) {
                     p.setTransactionReference(payload.get("transId").toString());
+                }
                 this.enrollmentRepo.addOrUpdateEnrollment(e);
             }
             return true;

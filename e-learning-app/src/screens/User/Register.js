@@ -22,14 +22,13 @@ const Register = () => {
     const nav = useNavigate();
 
     const validate = () => {
-        // 1. Kiểm tra rỗng
         for (let u of userInfo) {
             if (!(u.field in user) || !user[u.field]) {
                 setErr(`Vui lòng nhập ${u.title}!`);
                 return false;
             }
         }
-        // 2. Kiểm tra mật khẩu
+
         if (user.password !== user.confirm) {
             setErr('Mật khẩu xác nhận KHÔNG khớp!');
             return false;
@@ -41,7 +40,7 @@ const Register = () => {
         e.preventDefault();
 
         if (validate() === true) {
-            setErr(""); // Xóa lỗi cũ
+            setErr(""); 
             let form = new FormData();
             
             for (let key of Object.keys(user)) {
@@ -50,7 +49,7 @@ const Register = () => {
                 }
             }
 
-            // Xử lý file ảnh
+
             if (avatar.current.files.length > 0) {
                 form.append('avatar', avatar.current.files[0]);
             } else {

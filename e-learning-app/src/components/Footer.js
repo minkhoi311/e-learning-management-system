@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
     return (
-        // Dùng class bg-forest-green khai báo trong style.css
+
         <footer className="bg-forest-green pt-5 pb-3 mt-auto">
             <Container>
                 <Row>

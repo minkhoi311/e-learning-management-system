@@ -25,8 +25,6 @@ const MyEnrollments = () => {
         setError(null);
         try {
             let res = await authApis().get(endpoints['my-enrollments']);
-            
-            // Giữ lại những khóa học ĐÃ THANH TOÁN THÀNH CÔNG
             const successfulEnrollments = Array.isArray(res.data) 
                 ? res.data.filter(e => e.payment && e.payment.status === 'SUCCESS')
                 : [];
@@ -63,9 +61,7 @@ const MyEnrollments = () => {
         fetchEnrollments();
     }, [fetchEnrollments, searchParams]);
 
-    // ========================================================
-    // HÀM XỬ LÝ KHỞI TẠO HOẶC MỞ PHÒNG CHAT VỚI GIẢNG VIÊN
-    // ========================================================
+
     const startChatWithInstructor = async (instructor) => {
         if (!instructor || !instructor.id) {
             alert("Không tìm thấy thông tin giảng viên!");
@@ -73,13 +69,11 @@ const MyEnrollments = () => {
         }
 
         try {
-            // Gọi API Backend để lấy/tạo phòng chat
             let res = await authApis().post(endpoints['get-chat-room'], {
                 "target_id": instructor.id
             });
 
             if (res.status === 200 && res.data) {
-                // Chuyển hướng sang giao diện ChatRoom kèm theo dữ liệu phòng
                 nav('/chat', {
                     state: {
                         roomId: res.data.firebaseRoom,

@@ -85,23 +85,6 @@
                 </tbody>
             </table>
         </div>
-
-        <nav th:if="${totalPages > 1}" class="mt-4">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/lessons(page=${currentPage - 1}, kw=${param.kw}, courseId=${param.courseId}, isActive=${param.isActive})}">« Trước</a>
-                </li>
-
-                <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:href="@{/admin/lessons(page=${i}, kw=${param.kw}, courseId=${param.courseId}, isActive=${param.isActive})}" th:text="${i}"></a>
-                </li>
-
-                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/lessons(page=${currentPage + 1}, kw=${param.kw}, courseId=${param.courseId}, isActive=${param.isActive})}">Sau »</a>
-                </li>
-            </ul>
-        </nav>
-
     </section>
 
     <div th:replace="~{base :: footer}"></div>

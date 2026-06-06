@@ -26,7 +26,7 @@ const Home = () => {
                             </div>
                         </Col>
                         <Col lg={6} className="text-center">
-                            {/* Bạn có thể thay thế link ảnh này bằng ảnh thật trong dự án */}
+
                             <img 
                                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                                 alt="E-Learning Education" 
@@ -38,7 +38,6 @@ const Home = () => {
                 </Container>
             </section>
 
-            {/* 2. Features Section - Khối tính năng nổi bật */}
             <section className="features-section py-5 mb-5 bg-light">
                 <Container>
                     <div className="text-center mb-5">
@@ -47,7 +46,7 @@ const Home = () => {
                     </div>
                     
                     <Row className="g-4">
-                        {/* Feature 1 */}
+
                         <Col md={4}>
                             <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
                                 <div className="mb-3">
@@ -62,7 +61,7 @@ const Home = () => {
                             </Card>
                         </Col>
 
-                        {/* Feature 2 */}
+
                         <Col md={4}>
                             <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
                                 <div className="mb-3">
@@ -77,7 +76,7 @@ const Home = () => {
                             </Card>
                         </Col>
 
-                        {/* Feature 3 */}
+
                         <Col md={4}>
                             <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
                                 <div className="mb-3">

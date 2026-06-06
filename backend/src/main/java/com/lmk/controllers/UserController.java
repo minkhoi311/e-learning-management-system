@@ -2,8 +2,6 @@ package com.lmk.controllers;
 
 import com.lmk.pojo.User;
 import com.lmk.services.UserService;
-import com.lmk.utils.DaoUtils;
-import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -27,23 +25,9 @@ public class UserController {
     private Environment env;
 
     
-    //đang làm vượt mức controller
     @GetMapping("/users")
     public String listUsers(Model model, @RequestParam Map<String, String> params) {
-        if (!params.containsKey("page")) {
-            params.put("page", "1");
-        }
-
-        List<User> users = userService.getUsers(params);
-        model.addAttribute("users", users);
-
-        Long totalItems = userService.countUsers(params);
-        int pageSize = Integer.parseInt(env.getProperty("users.page_size", "10"));
-        int totalPages = DaoUtils.calculateTotalPages(totalItems, pageSize);
-
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("currentPage", Integer.parseInt(params.get("page")));
-
+        model.addAttribute("users", userService.getUsers(params));
         return "user";
     }
 
@@ -62,8 +46,6 @@ public class UserController {
     @PostMapping("/users/save")
     public String saveUser(@ModelAttribute("user") User user) {
         if (user.getId() != null) {
-            this.userService.saveUser(user);
-        } else {
             this.userService.saveUser(user);
         }
         return "redirect:/admin/users";

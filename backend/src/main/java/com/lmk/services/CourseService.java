@@ -13,11 +13,13 @@ import java.util.Map;
  * @author Acer
  */
 public interface CourseService {
-    List<Course> getCourses(Map<String, String> params);
-    Long countCourses(Map<String, String> params);
+List<Course> getCourses(Map<String, String> params);
     Course getCourseById(int id);
     List<Course> getCoursesByIds(String ids);
     Map<String, String> validate(Course c);
     void addOrUpdateCourse(Course c);
     void deleteCourse(int id);
+    
+    Course createCourse(Course c, String username);
+    Course updateCourse(int courseId, Course c, String username);
 }

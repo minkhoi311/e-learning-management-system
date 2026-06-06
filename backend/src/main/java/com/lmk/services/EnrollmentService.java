@@ -18,6 +18,8 @@ public interface EnrollmentService {
     Enrollment enroll(int courseId, String username);
     List<Enrollment> getEnrollmentsByCourse(int courseId);
     void markLessonCompleted(int enrollmentId, int lessonId);
+    List<Enrollment> getInstructorCourseEnrollments(int courseId, String username);
+    Map<String, Object> processPaymentFlow(int enrollmentId, String method);
     Enrollment updatePaymentMethod(int enrollmentId, String method);
     boolean processWebhook(Map<String, Object> payload);
 }

@@ -6,13 +6,11 @@ package com.lmk.repositories.impl;
 
 import com.lmk.pojo.User;
 import com.lmk.repositories.UserRepository;
-import com.lmk.utils.DaoUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.hibernate.Session;
@@ -82,36 +80,24 @@ public class UserRepositoryImpl implements UserRepository {
         q.select(root);
 
         List<Predicate> predicates = buildPredicates(b, root, params);
-        if (!predicates.isEmpty())
+        if (!predicates.isEmpty()) {
             q.where(predicates.toArray(Predicate[]::new));
-
+        }
+        
         q.orderBy(b.desc(root.get("createdTime")));
 
         Query<User> query = s.createQuery(q);
 
-        if (params != null && params.containsKey("page")) {
-            int pageSize = this.env.getProperty("users.page_size", Integer.class, 20);
+        if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            query.setFirstResult((page - 1) * pageSize);
+            int pageSize = this.env.getProperty("users.page_size", Integer.class, 1);
+            int start = (page - 1) * pageSize;
+
             query.setMaxResults(pageSize);
+            query.setFirstResult(start);
         }
 
         return query.getResultList();
-    }
-
-    @Override
-    public Long countUsers(Map<String, String> params) {
-        Session s = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = s.getCriteriaBuilder();
-        CriteriaQuery<Long> q = b.createQuery(Long.class);
-        Root<User> root = q.from(User.class);
-        q.select(b.count(root));
-
-        List<Predicate> predicates = buildPredicates(b, root, params);
-        if (!predicates.isEmpty())
-            q.where(predicates.toArray(Predicate[]::new));
-
-        return s.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -119,7 +105,7 @@ public class UserRepositoryImpl implements UserRepository {
         Session session = this.factory.getObject().getCurrentSession();
         return session.get(User.class, id);
     }
-    
+
     @Override
     public User getUserByUsername(String username) {
         Session s = this.factory.getObject().getCurrentSession();
@@ -143,11 +129,13 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void saveUser(User u) {
         Session session = this.factory.getObject().getCurrentSession();
-        if (u.getId() == null) 
+        if (u.getId() == null) {
             session.persist(u);
-        else session.merge(u);
+        } else {
+            session.merge(u);
+        }
     }
-    
+
     @Override
     public boolean authenticate(String username, String password) {
         User u = this.getUserByUsername(username);

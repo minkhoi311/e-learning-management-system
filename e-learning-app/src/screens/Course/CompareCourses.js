@@ -12,12 +12,11 @@ const CompareCourses = () => {
     const [error, setError] = useState(null);
 
     const [searchParams] = useSearchParams();
-    const ids = searchParams.get('ids'); // Lấy chuỗi id, VD: "1,2,3"
+    const ids = searchParams.get('ids');
     
     const nav = useNavigate();
     const [, cartDispatch] = useContext(MyCartContext);
 
-    // Xử lý thêm vào giỏ hàng (giống hệt bên trang Courses)
     const addToCart = (course) => {
         let cart = cookies.load('cart') || {};
         if (course.id in cart) {
@@ -43,7 +42,7 @@ const CompareCourses = () => {
                 return;
             }
             try {
-                // Gọi API lấy các khóa học dựa trên chuỗi ids
+
                 let res = await Apis.get(`${endpoints['compare']}?ids=${ids}`);
                 setCourses(res.data);
             } catch (err) {
@@ -100,7 +99,7 @@ const CompareCourses = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Hàng 1: Hình ảnh */}
+
                         <tr>
                             <td className="fw-bold text-muted">Hình ảnh</td>
                             {courses.map(c => (
@@ -115,7 +114,7 @@ const CompareCourses = () => {
                             ))}
                         </tr>
 
-                        {/* Hàng 2: Tên khóa học */}
+
                         <tr>
                             <td className="fw-bold text-muted">Tên khóa học</td>
                             {courses.map(c => (
@@ -125,7 +124,7 @@ const CompareCourses = () => {
                             ))}
                         </tr>
 
-                        {/* Hàng 3: Học phí */}
+
                         <tr>
                             <td className="fw-bold text-muted">Học phí</td>
                             {courses.map(c => (
@@ -145,7 +144,7 @@ const CompareCourses = () => {
                             ))}
                         </tr>
 
-                        {/* Hàng 5: Thời lượng */}
+      
                         <tr>
                             <td className="fw-bold text-muted">Thời lượng</td>
                             {courses.map(c => (
@@ -153,7 +152,7 @@ const CompareCourses = () => {
                             ))}
                         </tr>
 
-                        {/* Hàng 6: Giảng viên */}
+
                         <tr>
                             <td className="fw-bold text-muted">Giảng viên</td>
                             {courses.map(c => (
@@ -163,7 +162,7 @@ const CompareCourses = () => {
                             ))}
                         </tr>
 
-                        {/* Hàng 7: Mô tả */}
+
                         <tr>
                             <td className="fw-bold text-muted">Mô tả tóm tắt</td>
                             {courses.map(c => (

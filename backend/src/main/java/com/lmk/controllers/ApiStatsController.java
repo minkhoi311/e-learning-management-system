@@ -22,18 +22,13 @@ public class ApiStatsController {
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/secure/stats/overview")
     public ResponseEntity<Map<String, Object>> instructorStats(Principal principal) {
-        if (principal == null)
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(this.statsService.getInstructorStats(principal.getName()),HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/stats/monthly")
     public ResponseEntity<List<Map<String, Object>>> adminMonthlyStats(
-            @RequestParam(name = "year", defaultValue = "0") int year) {
-        if (year == 0) {
-            year = Year.now().getValue();
-        }
+            @RequestParam(name = "year") int year) {
         return new ResponseEntity<>(this.statsService.getMonthlyRevenue(year), HttpStatus.OK);
     }
     

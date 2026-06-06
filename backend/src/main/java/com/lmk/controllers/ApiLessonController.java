@@ -43,9 +43,6 @@ public class ApiLessonController {
     @GetMapping("/lessons/{lessonId}")
     public ResponseEntity<Lesson> getLessonDetail(@PathVariable("lessonId") int lessonId) {
         Lesson l = this.lessonService.getLessonById(lessonId);
-        if (l == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         return new ResponseEntity<>(l, HttpStatus.OK);
     }
 
@@ -53,6 +50,7 @@ public class ApiLessonController {
     public ResponseEntity<List<Lesson>> listByCourse(
             @PathVariable("courseId") int courseId,
             @RequestParam Map<String, String> params) {
+        
         params.put("courseId", String.valueOf(courseId));
         params.put("isActive", "true");
         return new ResponseEntity<>(this.lessonService.getLessons(params), HttpStatus.OK);
@@ -65,15 +63,8 @@ public class ApiLessonController {
 
     @PostMapping("/secure/lessons/{lessonId}/comments")
     public ResponseEntity<LessonComment> addComment( @PathVariable("lessonId") int lessonId,@RequestBody Map<String, Object> body,Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
         String content = (String) body.get("content");
         LessonComment saved = this.commentService.addComment(lessonId, content, principal.getName());
-        if (saved == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
@@ -81,15 +72,10 @@ public class ApiLessonController {
     public ResponseEntity<Void> deleteComment(
             @PathVariable("commentId") int commentId,
             Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
         boolean ok = this.commentService.deleteComment(commentId, principal.getName());
         if (!ok) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     

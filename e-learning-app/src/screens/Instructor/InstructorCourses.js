@@ -16,7 +16,7 @@ const InstructorCourses = () => {
         try {
             setLoading(true);
             let res = await authApis().get(`${endpoints['courses']}?username=${user.username}`);
-            setCourses(res.data.courses || []);
+            setCourses(res.data || []);
         } catch (err) {
             console.error(err);
             setError("Không thể tải danh sách khóa học.");

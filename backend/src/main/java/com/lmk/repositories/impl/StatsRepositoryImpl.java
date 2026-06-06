@@ -1,6 +1,7 @@
 package com.lmk.repositories.impl;
 
 import com.lmk.pojo.Course;
+import com.lmk.pojo.Enrollment;
 import com.lmk.pojo.Payment;
 import com.lmk.pojo.User;
 import com.lmk.repositories.StatsRepository;
@@ -28,7 +29,7 @@ public class StatsRepositoryImpl implements StatsRepository {
         Session s = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = s.getCriteriaBuilder();
         CriteriaQuery<Long> q = b.createQuery(Long.class);
-        Root<com.lmk.pojo.Course> root = q.from(com.lmk.pojo.Course.class);
+        Root<Course> root = q.from(Course.class);
 
         q.select(b.count(root));
         return s.createQuery(q).getSingleResult();
@@ -39,7 +40,7 @@ public class StatsRepositoryImpl implements StatsRepository {
         Session s = this.factory.getObject().getCurrentSession();
         CriteriaBuilder b = s.getCriteriaBuilder();
         CriteriaQuery<Long> q = b.createQuery(Long.class);
-        Root<com.lmk.pojo.Enrollment> root = q.from(com.lmk.pojo.Enrollment.class);
+        Root<Enrollment> root = q.from(Enrollment.class);
 
         q.select(b.count(root));
         return s.createQuery(q).getSingleResult();
@@ -59,16 +60,6 @@ public class StatsRepositoryImpl implements StatsRepository {
         return result != null ? result : 0.0;
     }
 
-    @Override
-    public List<Object[]> countUsersByRole() {
-        Session s = this.factory.getObject().getCurrentSession();
-        CriteriaBuilder b = s.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
-        Root<User> root = q.from(User.class);
-
-        q.multiselect(root.get("role"), b.count(root)).groupBy(root.get("role"));
-        return s.createQuery(q).getResultList();
-    }
 
     @Override
     public Long countCoursesByInstructor(int instructorId) {

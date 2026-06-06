@@ -34,31 +34,15 @@ public class ApiEnrollmentController {
 
     @GetMapping("/secure/enrollments/check/{courseId}")
     public ResponseEntity<Enrollment> checkEnrollment(@PathVariable("courseId") int courseId, Principal principal) {
-        if (principal == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
         Enrollment e = this.enrollmentService.getByStudentAndCourse(
-                this.userService.getUserByUsername(principal.getName()).getId(), courseId);
-
-        if (e != null) {
-            return new ResponseEntity<>(e, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+ this.userService.getUserByUsername(principal.getName()).getId(), courseId);
+        return new ResponseEntity<>(e, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/secure/courses/{courseId}/enroll")
     public ResponseEntity<Enrollment> enroll(@PathVariable("courseId") int courseId, Principal principal) {
-        try {
-            Enrollment e = this.enrollmentService.enroll(courseId, principal.getName());
-            return new ResponseEntity<>(e, HttpStatus.CREATED);
-        } catch (IllegalStateException ex) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Enrollment e = this.enrollmentService.enroll(courseId, principal.getName());
+        return new ResponseEntity<>(e, HttpStatus.CREATED);
     }
 
     @GetMapping("/secure/enrollments")

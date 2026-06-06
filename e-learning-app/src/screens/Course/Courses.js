@@ -140,7 +140,6 @@ const Courses = () => {
                 Danh sách khóa học
             </h2>
 
-            {/* BỘ LỌC */}
             <Card className="p-3 mb-4 shadow-sm border-0 bg-white">
                 <Form onSubmit={handleFilterSubmit} className="row g-2 align-items-end">
                     <Col md={3}>

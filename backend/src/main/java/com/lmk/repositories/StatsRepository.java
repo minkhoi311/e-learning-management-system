@@ -13,7 +13,7 @@ public interface StatsRepository {
         Long countAllCourses();
         Long countAllEnrollments();
         Double sumSuccessPayments();
-        List<Object[]> countUsersByRole();
+
         Long countCoursesByInstructor(int instructorId);
         Long countEnrollmentsByInstructor(int instructorId);
         List<Object[]> getRevenuePerCourseByInstructor(int instructorId);

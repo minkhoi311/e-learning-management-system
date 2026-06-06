@@ -24,11 +24,7 @@ public class ApiProgressController {
             @PathVariable("enrollmentId") int enrollmentId,
             @PathVariable("lessonId") int lessonId,
             Principal principal) {
-        try {
-            this.enrollmentService.markLessonCompleted(enrollmentId, lessonId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        this.enrollmentService.markLessonCompleted(enrollmentId, lessonId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

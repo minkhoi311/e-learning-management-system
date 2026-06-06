@@ -8,7 +8,6 @@ export default (current, action) => {
             let totalQuantity = 0;
             
             for (let c of Object.values(cart)) {
-                // Khóa học mặc định quantity là 1
                 let q = c.quantity || 1; 
                 totalQuantity += q;
                 totalAmount += q * c.price;

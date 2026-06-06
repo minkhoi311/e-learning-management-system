@@ -21,16 +21,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @ControllerAdvice
 public class HomeController {
+
     @Autowired
     private UserService userService;
-    
-    
+
     @RequestMapping("/")
     public String index(Model model, Principal principal) {
-        if (principal != null) {
-            model.addAttribute("currentUser",
-                    this.userService.getUserByUsername(principal.getName()));
-        }
+        model.addAttribute("currentUser",
+                this.userService.getUserByUsername(principal.getName()));
         return "index";
     }
 }
